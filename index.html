@@ -355,9 +355,23 @@ body{
 }
 .au-acc-item:hover, .au-acc-item:focus-within{ flex-grow:2.6; background:rgba(255,255,255,.045); }
 .au-acc-item:hover::after, .au-acc-item:focus-within::after{ opacity:1; }
+/* i pannelli alternano i due colori Aufinity: dispari blu, pari magenta.
+   Indice e numero fantasma leggono lo stesso --au-accent. */
+.au-acc-item:nth-child(odd){ --au-accent:var(--au-blue); }
+.au-acc-item:nth-child(even){ --au-accent:var(--au-pink); }
 .au-acc-idx{ position:relative; z-index:2; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.14em; color:var(--au-muted); transition:color .4s var(--au-ease); }
-.au-acc-item:hover .au-acc-idx, .au-acc-item:focus-within .au-acc-idx{ color:var(--au-blue); }
-.au-acc-ghost{ position:absolute; right:-16px; top:2px; font-family:'DM Mono',monospace; font-weight:500; font-size:150px; line-height:1; letter-spacing:-.04em; color:#fff; opacity:.035; pointer-events:none; }
+.au-acc-item:hover .au-acc-idx,
+.au-acc-item:focus-within .au-acc-idx,
+.au-acc-item:active .au-acc-idx{ color:var(--au-accent); }
+.au-acc-ghost{
+  position:absolute; right:-16px; top:2px; pointer-events:none;
+  font-family:'DM Mono',monospace; font-weight:500; font-size:150px; line-height:1;
+  letter-spacing:-.04em; color:#fff; opacity:.035;
+  transition:color .45s var(--au-ease), opacity .45s var(--au-ease);
+}
+.au-acc-item:hover .au-acc-ghost,
+.au-acc-item:focus-within .au-acc-ghost,
+.au-acc-item:active .au-acc-ghost{ color:var(--au-accent); opacity:.2; }
 .au-acc-body{ position:relative; z-index:2; }
 .au-acc-t{ font-size:clamp(19px,1.9vw,25px); font-weight:500; letter-spacing:-.02em; line-height:1.2; text-wrap:balance; }
 .au-acc-d{
@@ -382,7 +396,9 @@ body{
   .au-acc-item:hover, .au-acc-item:focus-within{ flex-grow:0; background:none; }
   .au-acc-item::after{ display:none; }
   .au-acc-d{ max-height:none; opacity:1; transform:none; margin-top:9px; }
+  /* niente hover su touch: il colore arriva al tocco (:active) */
   .au-acc-ghost{ font-size:76px; top:14px; right:-2px; }
+  .au-acc-item:active .au-acc-ghost{ opacity:.26; }
 }
 
 /* ─── 06 SOCIAL PROOF ─── */
