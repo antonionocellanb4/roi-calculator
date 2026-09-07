@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufinity – Calcolatore ROI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:       #16181c;
+  --card:     #1f2126;
+  --card2:    #25282e;
+  --line:     #2e3239;
+  --text:     #e8edf6;
+  --muted:    #7e8aa6;
+  --primary:  #3B82F6;
+  --primary-h:#2563EB;
+  --accent:   #009efa;
+  --accent2:  #f23d65;
+  --shadow:   0 24px 64px rgba(0,0,0,.55);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(59,130,246,.09), transparent),
+    radial-gradient(ellipse 50% 35% at 85% 100%, rgba(0,158,250,.06), transparent);
+}
+
+.page { display: none; padding: 32px 20px 72px; }
+.page.active { display: block; animation: fade-in .3s ease; }
+@keyframes fade-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+.page-header { max-width: 1100px; margin: 0 auto 32px; }
+.page-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.page-eyebrow::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--accent); display:block; }
+.page-header h1 { font-size: clamp(26px,3.5vw,40px); font-weight:900; line-height:1.1; letter-spacing:-.5px; margin-bottom:6px; }
+.page-header h1 span { color: var(--accent); }
+.page-header p { color:var(--muted); font-size:15px; line-height:1.6; max-width:560px; }
+
+.calc-grid { display:grid; grid-template-columns:1fr 1fr 1.1fr; gap:14px; max-width:1100px; margin:0 auto; align-items:stretch; }
+@media(max-width:900px){ .calc-grid{grid-template-columns:1fr 1fr;} .col-result{grid-column:1/-1;} }
+@media(max-width:560px){ .calc-grid{grid-template-columns:1fr;} .col-result{grid-column:1;} }
+
+/* ─── VIEWPORT ENTRY ANIMATION ─── */
+.calc-card,
+.col-result {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.calc-card.in-view,
+.col-result.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* staggered delays */
+.calc-card:nth-child(1) { transition-delay: .05s; }
+.calc-card:nth-child(2) { transition-delay: .15s; }
+.col-result             { transition-delay: .25s; }
+
+/* ─── WIGGLE on entry (one-shot) ─── */
+@keyframes wiggle {
+  0%   { transform: translateY(0) rotate(0deg); }
+  20%  { transform: translateY(0) rotate(-1.2deg); }
+  40%  { transform: translateY(0) rotate(1.2deg); }
+  60%  { transform: translateY(0) rotate(-.7deg); }
+  80%  { transform: translateY(0) rotate(.5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+.col-result.wiggle {
+  animation: wiggle .55s ease forwards;
+}
+
+.calc-card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:26px 24px; }
+.card-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:24px; }
+
+.input-field { margin-bottom:20px; }
+.input-field:last-child { margin-bottom:0; }
+.input-label { font-size:13px; color:var(--muted); font-weight:500; margin-bottom:8px; display:flex; align-items:center; gap:4px; }
+.input-row { display:flex; justify-content:space-between; align-items:center; background:#F7FAFC; border:1px solid #253050; border-radius:10px; padding:0 14px; transition:border-color .2s,box-shadow .2s; }
+.input-row:focus-within { border-color:var(--primary); box-shadow:0 0 0 3px rgba(59,130,246,.18); }
+.input-row input { background:none; border:none; outline:none; font-family:'DM Mono',monospace; font-size:17px; font-weight:700; color:#0f172a; padding:12px 0; width:100%; }
+.input-row input::-webkit-inner-spin-button,
+.input-row input::-webkit-outer-spin-button { -webkit-appearance:none; }
+.input-row input[type=number] { -moz-appearance:textfield; }
+.input-unit { font-family:'DM Mono',monospace; font-size:13px; color:#7e8aa6; white-space:nowrap; padding-left:8px; flex-shrink:0; }
+
+.metric-row { display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--line); }
+.metric-row:first-of-type { padding-top:0; }
+.metric-row:last-child { border-bottom:none; padding-bottom:0; }
+.metric-label { font-size:13px; color:var(--muted); line-height:1.4; max-width:155px; }
+.metric-value { font-family:'DM Mono',monospace; font-size:15px; font-weight:700; color:#fff; text-align:right; white-space:nowrap; }
+.metric-value.accent { color:var(--accent); }
+.metric-value.red    { color:var(--accent2); }
+
+/* ─── NUMBER FLASH on update ─── */
+@keyframes numFlash {
+  0%   { color: #fff; }
+  30%  { color: var(--accent); }
+  100% { color: inherit; }
+}
+.metric-value.flash,
+.result-big.flash,
+.result-detail-val.flash {
+  animation: numFlash .4s ease;
+}
+
+.col-result {
+  background:linear-gradient(145deg,#23272e 0%,#1a1d22 60%,#20242b 100%);
+  border:1px solid rgba(59,130,246,.2); border-radius:20px; padding:30px 26px;
+  position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between;
+  box-shadow:0 0 0 1px rgba(0,158,250,.08) inset, var(--shadow);
+}
+.col-result::before { content:''; position:absolute; top:-60px; right:-60px; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle,rgba(59,130,246,.18) 0%,transparent 70%); pointer-events:none; }
+.col-result::after  { content:''; position:absolute; bottom:-40px; left:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle,rgba(0,158,250,.10) 0%,transparent 70%); pointer-events:none; }
+.result-top { position:relative; z-index:1; }
+.result-eyebrow { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.result-big { font-family:'DM Mono',monospace; font-size:clamp(34px,3.8vw,50px); font-weight:900; color:#fff; line-height:1; letter-spacing:-1px; margin-bottom:8px; }
+.result-sub { font-size:13px; color:var(--muted); line-height:1.55; max-width:280px; }
+.result-divider { border:none; border-top:1px solid rgba(255,255,255,.08); margin:18px 0; }
+.result-detail-row { display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:9px; }
+.result-detail-row:last-of-type { margin-bottom:0; }
+.result-detail-label { color:var(--muted); }
+.result-detail-val { font-family:'DM Mono',monospace; font-weight:700; color:#fff; }
+.result-bottom { position:relative; z-index:1; margin-top:24px; }
+
+/* ─── CTA BUTTON: Pulse glow ─── */
+@keyframes ctaPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(59,130,246,.55), 0 8px 24px rgba(59,130,246,.25); }
+  60%  { box-shadow: 0 0 0 10px rgba(59,130,246,.0), 0 8px 24px rgba(59,130,246,.35); }
+  100% { box-shadow: 0 0 0 0 rgba(59,130,246,.0),  0 8px 24px rgba(59,130,246,.25); }
+}
+@keyframes btnWiggle {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-2px); }
+  40%     { transform: translateX(2px); }
+  60%     { transform: translateX(-1.5px); }
+  80%     { transform: translateX(1px); }
+}
+
+.cta-btn {
+  width:100%; padding:15px; background:var(--primary);
+  border:none; border-radius:12px; color:#fff;
+  font-family:inherit; font-size:15px; font-weight:900; cursor:pointer;
+  letter-spacing:.1px;
+  transition: background .2s, transform .1s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  animation: ctaPulse 2.6s ease-in-out infinite, btnWiggle 6s ease-in-out 4s infinite;
+}
+.cta-btn:hover {
+  background: var(--primary-h);
+  animation: none;
+  box-shadow: 0 8px 28px rgba(59,130,246,.45);
+}
+.cta-btn:active { transform:scale(.98); }
+
+.source-line { font-size:11px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.5; }
+
+.estimacion-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(126,138,166,.1); border:1px solid rgba(126,138,166,.2); color:var(--muted); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 10px; border-radius:100px; margin-bottom:12px; }
+
+.results-wrap { max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:14px; font-weight:600; cursor:pointer; border:none; background:none; padding:0; margin-bottom:28px; transition:color .2s; }
+.back-btn:hover { color:#fff; }
+.results-header { text-align:center; margin-bottom:28px; }
+.results-header h1 { font-size:clamp(24px,4vw,38px); font-weight:900; line-height:1.15; letter-spacing:-.4px; margin-bottom:8px; }
+.results-header h1 span { color:var(--accent); }
+.results-header p { color:var(--muted); font-size:14px; line-height:1.65; }
+
+.results-cols { display:grid; grid-template-columns:1fr 400px; gap:20px; align-items:start; }
+@media(max-width:900px){ .results-cols{grid-template-columns:1fr;} }
+.results-left { display:flex; flex-direction:column; gap:16px; }
+
+.result-kpis { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+@media(max-width:500px){ .result-kpis{grid-template-columns:1fr;} }
+.rkpi { background:var(--card2); border:1px solid var(--line); border-radius:16px; padding:16px 18px; text-align:center; }
+.rkpi.accent { border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,158,250,.10) inset; }
+.rkpi.orange { border-color:var(--accent2); box-shadow:0 0 0 2px rgba(242,61,101,.10) inset; }
+.rkpi-label { font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); }
+.rkpi-value { font-size:26px; font-weight:900; font-family:'DM Mono',monospace; color:#fff; margin-top:4px; }
+.rkpi-value.green { color:var(--accent); }
+.rkpi-value.orange-v { color:var(--accent2); }
+.rkpi-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+.rkpi-estimacion { font-size:10px; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); opacity:.7; margin-top:4px; }
+
+.breakdown { background:var(--card2); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+.breakdown-row { display:grid; grid-template-columns:1fr auto auto; gap:12px; padding:11px 18px; align-items:center; border-bottom:1px solid var(--line); font-size:13px; }
+.breakdown-row:last-child { border-bottom:none; }
+.breakdown-row.header { font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--muted); background:rgba(255,255,255,.02); }
+.breakdown-row .hrs { font-family:'DM Mono',monospace; font-weight:700; color:#93c5fd; text-align:right; }
+.breakdown-row .eur { font-family:'DM Mono',monospace; font-weight:700; color:var(--accent); text-align:right; }
+
+.source-note { font-size:11px; color:var(--muted); line-height:1.6; }
+.source-note strong { color:#93c5fd; }
+
+.input-summary { background:var(--card2); border:1px solid var(--line); border-radius:16px; padding:16px 18px; }
+.input-summary-title { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+.input-summary-row { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid var(--line); color:var(--muted); }
+.input-summary-row:last-of-type { border-bottom:none; }
+.input-summary-row span:last-child { font-family:'DM Mono',monospace; font-weight:700; color:#fff; }
+.back-inline-btn { margin-top:12px; background:none; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-family:inherit; font-size:12px; font-weight:600; padding:7px 12px; cursor:pointer; display:flex; align-items:center; gap:5px; transition:border-color .2s,color .2s; }
+.back-inline-btn:hover { border-color:var(--primary); color:#fff; }
+
+.hs-section { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:28px 26px; box-shadow:var(--shadow); position:sticky; top:24px; }
+.hs-section-header { margin-bottom:20px; }
+.hs-section-header h3 { font-size:20px; font-weight:900; margin-bottom:6px; }
+.hs-section-header h3 span { color:var(--accent); }
+.hs-section-header p { color:var(--muted); font-size:13px; line-height:1.6; }
+
+.tooltip-wrap { position:relative; display:inline-flex; align-items:center; vertical-align:middle; cursor:default; }
+.tooltip-icon { display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%; border:1.5px solid var(--muted); color:var(--muted); font-size:9px; font-weight:700; font-style:normal; line-height:1; margin-left:4px; transition:border-color .2s,color .2s; }
+.tooltip-wrap:hover .tooltip-icon,
+.tooltip-wrap:focus .tooltip-icon { border-color:var(--primary); color:var(--primary); }
+.tooltip-box { display:none; position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:#2e3239; border:1px solid var(--line); border-radius:10px; padding:10px 13px; font-size:12px; font-weight:400; color:var(--text); line-height:1.55; width:260px; box-shadow:0 8px 24px rgba(0,0,0,.45); z-index:100; pointer-events:none; white-space:normal; }
+.tooltip-box::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:#2e3239; }
+.tooltip-wrap:hover .tooltip-box,
+.tooltip-wrap:focus .tooltip-box { display:block; }
+
+#hs-form-container .hs-form-field label { color:var(--muted) !important; font-size:12px !important; font-weight:600 !important; letter-spacing:.3px !important; }
+#hs-form-container input[type="text"],
+#hs-form-container input[type="email"],
+#hs-form-container input[type="tel"],
+#hs-form-container select { background:#F7FAFC !important; border:1px solid #253050 !important; border-radius:10px !important; color:#0f172a !important; font-family:'DM Sans',sans-serif !important; font-size:15px !important; padding:12px 14px !important; width:100% !important; }
+#hs-form-container input[type="submit"],
+#hs-form-container .hs-button { background:var(--primary) !important; border:none !important; border-radius:12px !important; color:#fff !important; font-family:'DM Sans',sans-serif !important; font-size:15px !important; font-weight:900 !important; padding:14px 24px !important; cursor:pointer !important; width:100% !important; margin-top:8px !important; }
+#hs-form-container input[type="submit"]:hover,
+#hs-form-container .hs-button:hover { background:var(--primary-h) !important; }
+#hs-form-container .hs-form .hs-form-field { margin-bottom:12px !important; }
+#hs-form-container fieldset { border:0 !important; margin:0 !important; padding:0 !important; }
+#hs-form-container .hs-form { row-gap:0 !important; }
+#hs-form-container .legal-consent-container { margin-top:6px !important; font-size:12px; }
+#hs-form-container .hs-fieldtype-hidden,
+#hs-form-container input[type="hidden"] { display:none !important; }
+</style>
+</head>
+<body>
+
+<!-- STEP 1 -->
+<div class="page active" id="page-calc">
+  <div class="page-header">
+    <div class="page-eyebrow">Calcolatore ROI</div>
+    <h1>Quanto denaro sta perdendo<br>la tua concessionaria <span>ogni mese?</span></h1>
+    <p>Inserisci i tuoi dati e scopri in 30 secondi il reale impatto sul tuo business.</p>
+  </div>
+
+  <div class="calc-grid">
+    <div class="calc-card">
+      <div class="card-label">I tuoi dati</div>
+      <div class="input-field">
+        <div class="input-label">Vendite mensili</div>
+        <div class="input-row">
+          <input type="number" id="inSales" value="35" min="1" max="9999">
+          <span class="input-unit">unità</span>
+        </div>
+      </div>
+      <div class="input-field">
+        <div class="input-label">Servizi officina mensili</div>
+        <div class="input-row">
+          <input type="number" id="inService" value="300" min="1" max="99999">
+          <span class="input-unit">unità</span>
+        </div>
+      </div>
+      <div class="input-field">
+        <div class="input-label">
+          <span>Costo orario interno</span>
+          <span class="tooltip-wrap" tabindex="0">
+            <span class="tooltip-icon">i</span>
+            <span class="tooltip-box">Valore di riferimento di 30 €/ora basato su stime medie di mercato per profili operativi nelle concessionarie, inclusi non solo lo stipendio lordo, ma anche i contributi sociali e altri costi associati.</span>
+          </span>
+        </div>
+        <div class="input-row">
+          <input type="number" id="inRate" value="30" min="1" max="999">
+          <span class="input-unit">€/h</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="card-label">Stima del risparmio</div>
+      <div class="metric-row">
+        <div class="metric-label">VENDITE: Ore dedicate alle attività manuali al mese</div>
+        <div class="metric-value" id="mSalesHrsMonth">–</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">POSTVENDITA: Ore dedicate alle attività manuali al mese</div>
+        <div class="metric-value" id="mSvcHrsMonth">–</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Totale ore di lavoro manuale al mese</div>
+        <div class="metric-value accent" id="mTotalHrsMonth">–</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Costo mensile stimato</div>
+        <div class="metric-value red" id="mCostMonth">–</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Ore recuperate all'anno</div>
+        <div class="metric-value" id="mTotalHrsYear">–</div>
+      </div>
+    </div>
+
+    <div class="col-result">
+      <div class="result-top">
+        <div class="estimacion-badge">Stima</div>
+        <div class="result-eyebrow">Recupero finanziario annuale</div>
+        <div class="result-big" id="rBigEur">–</div>
+        <p class="result-sub">Stima del risparmio annuale con Aufinity</p>
+        <hr class="result-divider">
+        <div class="result-detail-row">
+          <span class="result-detail-label">🚗 Vendite – € / anno</span>
+          <span class="result-detail-val" id="rSalesEur">–</span>
+        </div>
+        <div class="result-detail-row">
+          <span class="result-detail-label">🔧 Officina – € / anno</span>
+          <span class="result-detail-val" id="rSvcEur">–</span>
+        </div>
+      </div>
+      <div class="result-bottom">
+        <button type="button" class="cta-btn" id="ctaBtn" onclick="goToResults()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Visualizza il mio potenziale di risparmio
+        </button>
+        <p class="source-line">Metodologia: Vendite × 30 min · Officina × 10 min (Studio MSI 2026, 41% mercato spagnolo). I calcoli si basano sul volume mensile inserito × 12 mesi.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="page" id="page-results">
+  <div class="results-wrap">
+    <button type="button" class="back-btn" onclick="goToCalc()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Torna al calcolatore
+    </button>
+
+    <div class="results-header">
+      <h1>La tua concessionaria perde<br><span id="kpiEurHeadline" style="color:var(--accent)">–</span> all'anno</h1>
+      <p>Basato sul tuo volume e sullo Studio MSI 2026 (41% del mercato spagnolo)</p>
+    </div>
+
+    <div class="results-cols">
+      <div class="results-left">
+        <div class="result-kpis">
+          <div class="rkpi accent">
+            <div class="rkpi-label">Ore recuperate all'anno</div>
+            <div class="rkpi-value green" id="kpiHours">–</div>
+            <div class="rkpi-sub" id="kpiHoursSub">–</div>
+            <div class="rkpi-estimacion">* Stima</div>
+          </div>
+          <div class="rkpi orange">
+            <div class="rkpi-label">Recupero finanziario annuale</div>
+            <div class="rkpi-value orange-v" id="kpiEur">–</div>
+            <div class="rkpi-sub" id="kpiEurSub">–</div>
+            <div class="rkpi-estimacion">* Stima</div>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <div class="breakdown-row header">
+            <span>Area</span>
+            <span style="text-align:right">Ore / anno *</span>
+            <span style="text-align:right">€ / anno *</span>
+          </div>
+          <div class="breakdown-row">
+            <span>🚗 Vendite</span>
+            <span class="hrs" id="brkSalesHrs">–</span>
+            <span class="eur" id="brkSalesEur">–</span>
+          </div>
+          <div class="breakdown-row">
+            <span>🔧 Officina (After Sales)</span>
+            <span class="hrs" id="brkSvcHrs">–</span>
+            <span class="eur" id="brkSvcEur">–</span>
+          </div>
+          <div class="breakdown-row" style="background:rgba(255,255,255,.03);font-weight:700;">
+            <span>Totale</span>
+            <span class="hrs" id="brkTotalHrs">–</span>
+            <span class="eur" id="brkTotalEur">–</span>
+          </div>
+        </div>
+
+        <div class="input-summary">
+          <div class="input-summary-title">Basato sui tuoi dati</div>
+          <div class="input-summary-row">
+            <span>Vendite mensili</span><span id="sumSales">–</span>
+          </div>
+          <div class="input-summary-row">
+            <span>Servizi officina mensili</span><span id="sumService">–</span>
+          </div>
+          <div class="input-summary-row">
+            <span>Costo orario interno</span><span id="sumRate">–</span>
+          </div>
+          <button type="button" class="back-inline-btn" onclick="goToCalc()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4v7"/><path d="M4 4l7 7"/></svg>
+            Modifica valori
+          </button>
+        </div>
+
+        <div class="source-note">* <strong>Stima.</strong> Metodologia: Vendite × 30 min · Officina × 10 min (Studio MSI 2026, 41% mercato spagnolo). I calcoli si basano sul volume mensile inserito × 12 mesi.</div>
+      </div>
+
+      <div class="hs-section">
+        <div class="hs-section-header">
+          <h3>Scopri come <span>Aufinity</span> risolve il problema</h3>
+          <p>Lascia i tuoi dati di contatto e un nostro consulente ti mostrerà in soli 20 minuti quanto può recuperare la tua concessionaria.</p>
+        </div>
+        <div id="hs-form-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+const SALES_MIN   = 30;
+const SERVICE_MIN = 10;
+const LANG        = 'it';
+
+const euro0 = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0});
+const num1  = new Intl.NumberFormat('it-IT', {maximumFractionDigits:1});
+
+let hsFormCreated = false;
+let lastResults   = {};
+
+// ─── set + optional flash animation ───
+function set(id, val, flash){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(el.textContent === val) return; // no change, no flash
+  el.textContent = val;
+  if(flash){
+    el.classList.remove('flash');
+    void el.offsetWidth; // force reflow
+    el.classList.add('flash');
+    el.addEventListener('animationend', () => el.classList.remove('flash'), { once:true });
+  }
+}
+
+function compute(){
+  const sales   = Math.max(0, Number(document.getElementById('inSales').value)   || 0);
+  const service = Math.max(0, Number(document.getElementById('inService').value) || 0);
+  const rate    = Math.max(1, Number(document.getElementById('inRate').value)    || 30);
+
+  const salesHrsM = (sales   * SALES_MIN)   / 60;
+  const svcHrsM   = (service * SERVICE_MIN)  / 60;
+  const totalHrsM = salesHrsM + svcHrsM;
+  const salesHrsY = salesHrsM * 12;
+  const svcHrsY   = svcHrsM   * 12;
+  const totalHrsY = totalHrsM * 12;
+  const salesEurY = salesHrsY * rate;
+  const svcEurY   = svcHrsY   * rate;
+  const totalEurY = totalHrsY * rate;
+  const costMonth = totalHrsM * rate;
+
+  lastResults = { sales, service, rate,
+    totalHrsYear: Math.round(totalHrsY),
+    totalEurYear: Math.round(totalEurY),
+    pageUrl: window.location.href
+  };
+
+  const F = true; // flash = true
+
+  set('mSalesHrsMonth', num1.format(+salesHrsM.toFixed(1)) + ' h', F);
+  set('mSvcHrsMonth',   num1.format(+svcHrsM.toFixed(1))   + ' h', F);
+  set('mTotalHrsMonth', num1.format(+totalHrsM.toFixed(1)) + ' h', F);
+  set('mCostMonth',     euro0.format(Math.round(costMonth)), F);
+  set('mTotalHrsYear',  num1.format(Math.round(totalHrsY)) + ' h', F);
+  set('rBigEur',        euro0.format(Math.round(totalEurY)), F);
+  set('rSalesEur',      euro0.format(Math.round(salesEurY)), F);
+  set('rSvcEur',        euro0.format(Math.round(svcEurY)), F);
+
+  set('kpiEurHeadline', euro0.format(Math.round(totalEurY)));
+  set('kpiHours',       num1.format(Math.round(totalHrsY)) + ' h');
+  set('kpiHoursSub',    num1.format(+totalHrsM.toFixed(1)) + ' h/mese');
+  set('kpiEur',         euro0.format(Math.round(totalEurY)));
+  set('kpiEurSub',      euro0.format(Math.round(totalEurY/12)) + ' /mese a ' + euro0.format(rate) + '/h');
+
+  set('brkSalesHrs',   num1.format(Math.round(salesHrsY)) + ' h');
+  set('brkSalesEur',   euro0.format(Math.round(salesEurY)));
+  set('brkSvcHrs',     num1.format(Math.round(svcHrsY))   + ' h');
+  set('brkSvcEur',     euro0.format(Math.round(svcEurY)));
+  set('brkTotalHrs',   num1.format(Math.round(totalHrsY)) + ' h');
+  set('brkTotalEur',   euro0.format(Math.round(totalEurY)));
+
+  set('sumSales',   sales   + ' unità');
+  set('sumService', service + ' unità');
+  set('sumRate',    rate    + ' €/h');
+}
+
+['inSales','inService','inRate'].forEach(id => {
+  document.getElementById(id).addEventListener('input', compute);
+});
+
+// ─── VIEWPORT OBSERVER ───
+function setupViewportAnimation(){
+  const targets = document.querySelectorAll('.calc-card, .col-result');
+  if(!('IntersectionObserver' in window)){
+    targets.forEach(el => el.classList.add('in-view'));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        const el = entry.target;
+        el.classList.add('in-view');
+        if(el.classList.contains('col-result')){
+          setTimeout(() => {
+            el.classList.add('wiggle');
+            el.addEventListener('animationend', () => el.classList.remove('wiggle'), { once:true });
+          }, 400);
+        }
+        io.unobserve(el);
+      }
+    });
+  }, { threshold: 0.15 });
+  targets.forEach(el => io.observe(el));
+}
+
+window.goToResults = function(){
+  document.getElementById('page-calc').classList.remove('active');
+  document.getElementById('page-results').classList.add('active');
+  initHsForm().then(() => setHsHiddenFields(lastResults));
+};
+window.goToCalc = function(){
+  document.getElementById('page-results').classList.remove('active');
+  document.getElementById('page-calc').classList.add('active');
+};
+
+function setHsHiddenFields(data){
+  const target = document.getElementById('hs-form-container');
+  if(!target) return;
+  const summary = [
+    'url: '                         + data.pageUrl,
+    'lang: '                        + LANG,
+    'monthly_sales: '               + data.sales    + ' units',
+    'monthly_service: '             + data.service  + ' units',
+    'hourly_rate: '                 + data.rate     + ' EUR/h',
+    'hours_saved_per_year: '        + data.totalHrsYear + ' h',
+    'financial_recovery_per_year: ' + data.totalEurYear + ' EUR'
+  ].join(' | ');
+  function trySet(){
+    const input = target.querySelector('[name="roi_calculator_results"]');
+    if(input){
+      input.value = summary;
+      input.dispatchEvent(new Event('input',  { bubbles:true }));
+      input.dispatchEvent(new Event('change', { bubbles:true }));
+    } else { setTimeout(trySet, 150); }
+  }
+  trySet();
+}
+
+function ensureHubSpotScript(){
+  return new Promise(resolve => {
+    if(window.hbspt && window.hbspt.forms) return resolve();
+    if(document.querySelector('script[data-aufinity-hs]')){
+      const t = setInterval(() => { if(window.hbspt && window.hbspt.forms){ clearInterval(t); resolve(); } }, 50);
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = '//js-eu1.hsforms.net/forms/embed/v2.js';
+    s.async = true; s.charset = 'utf-8'; s.type = 'text/javascript';
+    s.dataset.aufinityHs = 'true';
+    s.onload = () => resolve();
+    document.head.appendChild(s);
+  });
+}
+
+async function initHsForm(){
+  if(hsFormCreated) return;
+  hsFormCreated = true;
+  await ensureHubSpotScript();
+  try {
+    window.hbspt.forms.create({
+      portalId: "5985319",
+      formId:   "a6d4bc37-630c-4299-a660-9be4e0f05546",
+      region:   "eu1",
+      target:   "#hs-form-container"
+    });
+  } catch(e) {
+    document.getElementById('hs-form-container').innerHTML =
+      '<p style="color:#7e8aa6;font-size:13px;padding:12px 0">Modulo non disponibile.</p>';
+  }
+}
+
+compute();
+setupViewportAnimation();
+
+})();
+</script>
+</body>
+</html>

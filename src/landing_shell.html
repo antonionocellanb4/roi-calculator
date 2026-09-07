@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufinity — ROI Calculator per concessionarie</title>
+<meta name="description" content="Quanto denaro sta perdendo la tua concessionaria ogni mese? Scoprilo in pochi secondi con il Calcolatore ROI di Aufinity.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ══════════════════════════════════════════════════════════════
+     LANDING PAGE STYLES
+     Linguaggio visivo allineato a aufinity-oktoberfest:
+     fondo piatto con orb ambientali animati, pannelli in vetro,
+     hairline animate, tendina rosa sull'hover dei bottoni.
+     I bottoni e la nav restano a pillola, come su aufinity.com.
+     Tutte le classi sono prefissate .au- per non entrare mai in
+     collisione con il codice del calcolatore.
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+:root{
+  --au-bg:       #101114;   /* --color-black  */
+  --au-panel:    #1a1b23;   /* --color-grey-100 */
+  --au-glass:    rgba(255,255,255,.03);
+  --au-line:     rgba(255,255,255,.08);
+  --au-line-2:   rgba(255,255,255,.16);
+  --au-text:     #ffffff;
+  --au-muted:    #82869a;   /* --color-grey-400 */
+  --au-muted-2:  #a5a9bd;   /* --color-grey-700 */
+  --au-dim:      #999999;   /* --color-grey */
+  --au-blue:     #009df9;
+  --au-pink:     #f13d65;
+  --au-max:      1180px;
+  --au-radius:   30px;      /* 3rem, come .agenda__content */
+  --au-ease:     cubic-bezier(.22,.61,.36,1);
+}
+
+html{ scroll-behavior:smooth; scroll-padding-top:110px; }
+body{
+  background:var(--au-bg);
+  color:var(--au-text);
+  font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{ background:rgba(0,157,249,.25); }
+
+/* ─── layout ─── */
+.au-wrap{ max-width:var(--au-max); margin:0 auto; padding:0 24px; }
+.au-section{ padding:120px 0; position:relative; }
+.au-section--tight{ padding:96px 0; }
+.au-divider{ height:1px; background:var(--au-line); }
+
+/* ─── fondo ambientale animato ───
+   Ripreso da .ambient-glow della landing Oktoberfest: orb sfocati
+   che derivano lentamente dietro al contenuto. */
+.au-glow{ position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; }
+.au-glow i{
+  position:absolute; border-radius:50%; filter:blur(150px); opacity:.22;
+  will-change:transform;
+  animation:au-orb 20s cubic-bezier(.4,0,.2,1) infinite alternate;
+}
+/* due soli orb, contenuti e appoggiati agli angoli: una velatura, non una
+   chiazza. Il bianco è il più piccolo dei due perché è quello che si vede. */
+.au-glow i:nth-child(1){ background:#999999; width:42vw; height:44vh; top:-10vh; left:-12vw; }
+.au-glow i:nth-child(2){ background:#f2f2f2; width:40vw; height:42vh; bottom:-8vh; right:-10vw; opacity:.21; animation-duration:25s; animation-delay:-5s; }
+@keyframes au-orb{
+  0%   { transform:translate(0,0) scale(1); }
+  33%  { transform:translate(15vw,20vh) scale(1.1); }
+  66%  { transform:translate(-10vw,15vh) scale(.9); }
+  100% { transform:translate(5vw,-15vh) scale(1.05); }
+}
+
+/* ─── typography ─── */
+.au-eyebrow{
+  font-size:13px; font-weight:500; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--au-muted);
+  display:block; margin-bottom:22px;
+}
+.au-h1{
+  /* titolo lungo (58 caratteri): scala contenuta, altrimenti occupa 5 righe */
+  font-weight:500; font-size:clamp(34px,4.1vw,56px);
+  line-height:1.06; letter-spacing:-.025em; margin-bottom:26px; text-wrap:balance;
+}
+.au-h2{
+  font-weight:500; font-size:clamp(32px,4.2vw,52px);
+  line-height:1.08; letter-spacing:-.025em;
+  margin-bottom:22px; max-width:680px; text-wrap:balance;
+}
+.au-h2--wide{ max-width:900px; }
+.au-h3{ font-weight:500; font-size:20px; line-height:1.3; letter-spacing:-.01em; margin-bottom:8px; text-wrap:balance; }
+.au-lead{ color:var(--au-muted-2); font-size:18px; line-height:1.6; max-width:600px; text-wrap:pretty; }
+.au-body{ color:var(--au-muted); font-size:15px; line-height:1.7; max-width:505px; text-wrap:pretty; }
+.au-body + .au-body{ margin-top:14px; }
+.au-blue{ color:var(--au-blue); }
+.au-pink{ color:var(--au-pink); }
+
+/* ─── bottoni: pillola, come su aufinity.com ─── */
+.au-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  font-size:15px; font-weight:500; line-height:1;
+  padding:15px 28px; border-radius:320px; border:1px solid transparent;
+  text-decoration:none; cursor:pointer; white-space:nowrap;
+  position:relative; overflow:hidden;
+  transition:background .25s var(--au-ease), color .25s var(--au-ease), transform .25s var(--au-ease), border-color .25s var(--au-ease), box-shadow .25s var(--au-ease);
+}
+.au-btn > *{ position:relative; z-index:1; }
+.au-btn:hover{ transform:translateY(-2px); }
+/* Tendina rosa direzionale (come .header__button di Oktoberfest): entra da
+   sinistra all'hover ed esce a destra al rilascio, perché l'origin si ribalta.
+   Sta su TUTTI i bottoni: così spostandosi da uno all'altro il colore sembra
+   proseguire dal primo al secondo invece di ripartire da zero. */
+.au-btn::before{
+  content:''; position:absolute; inset:0; background:var(--au-pink);
+  transform:scaleX(0); transform-origin:right center;
+  transition:transform .45s var(--au-ease);
+}
+.au-btn:hover::before{ transform:scaleX(1); transform-origin:left center; }
+/* Il bordo è trasparente ma lo sfondo del bottone dipinge anche sotto di esso,
+   quindi in hover restava un filo celeste attorno alla tendina rosa (la tendina
+   copre solo il padding box). Portando il bordo a rosa il filo sparisce. */
+.au-btn-primary:hover,
+.au-btn-light:hover{ border-color:var(--au-pink); }
+.au-btn-primary{ background:var(--au-blue); color:#fff; box-shadow:0 10px 30px rgba(0,157,249,.22); }
+.au-btn-primary:hover{ box-shadow:0 16px 40px rgba(241,61,101,.30); }
+.au-btn-light{ background:#fff; color:var(--au-bg); }
+.au-btn-light:hover{ color:#fff; box-shadow:0 16px 40px rgba(241,61,101,.28); }
+.au-btn-ghost{ background:transparent; color:#fff; border-color:var(--au-line-2); }
+/* bordo rosa in hover: si fonde con la tendina, niente doppio contorno bianco */
+.au-btn-ghost:hover{ border-color:var(--au-pink); box-shadow:0 16px 40px rgba(241,61,101,.24); }
+.au-btn-sm{ padding:11px 22px; font-size:14px; }
+.au-btn-arrow{ transition:transform .25s var(--au-ease); }
+.au-btn:hover .au-btn-arrow{ transform:translateX(4px); }
+
+/* ─── nav: pillola flottante ─── */
+.au-nav-wrap{
+  position:sticky; top:0; z-index:100; padding:16px 24px 26px;
+  background:linear-gradient(180deg, rgba(16,17,20,.94) 0%, rgba(16,17,20,.78) 58%, rgba(16,17,20,0) 100%);
+}
+.au-nav{
+  max-width:var(--au-max); margin:0 auto;
+  display:flex; align-items:center; gap:24px;
+  padding:12px 12px 12px 26px; border-radius:320px;
+  background:rgba(26,27,35,.72); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--au-line);
+}
+.au-nav-logo{ display:flex; align-items:center; flex:none; }
+.au-nav-logo svg{ width:132px; height:auto; display:block; }
+.au-nav-links{ display:flex; gap:26px; margin-left:auto; }
+.au-nav-links a{
+  color:rgba(255,255,255,.72); text-decoration:none; font-size:14.5px; font-weight:500;
+  position:relative; transition:color .25s;
+}
+.au-nav-links a::after{
+  content:''; position:absolute; left:0; right:0; bottom:-6px; height:1px;
+  background:var(--au-blue); transform:scaleX(0); transform-origin:right center;
+  transition:transform .35s var(--au-ease);
+}
+.au-nav-links a:hover{ color:#fff; }
+.au-nav-links a:hover::after{ transform:scaleX(1); transform-origin:left center; }
+.au-nav .au-btn{ flex:none; }
+@media(max-width:900px){
+  .au-nav-links{ display:none; }
+  .au-nav{ padding:10px 10px 10px 18px; }
+  .au-nav-logo svg{ width:112px; }
+}
+
+/* ─── reveal on scroll ─── */
+.au-reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s var(--au-ease), transform .8s var(--au-ease); }
+.au-reveal.au-in{ opacity:1; transform:none; }
+.au-reveal[data-d="1"]{ transition-delay:.08s; }
+.au-reveal[data-d="2"]{ transition-delay:.16s; }
+.au-reveal[data-d="3"]{ transition-delay:.24s; }
+.au-reveal[data-d="4"]{ transition-delay:.32s; }
+
+/* ─── 01 HERO ─── */
+.au-hero{ position:relative; padding:72px 0 120px; overflow:hidden; }
+.au-hero-grid{
+  position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.55;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:80px 80px;
+  -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+          mask-image:linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+}
+.au-hero-inner{ position:relative; z-index:1; display:grid; grid-template-columns:1.14fr .86fr; gap:56px; align-items:center; }
+.au-hero-copy .au-lead{ margin-bottom:40px; }
+.au-hero-cta{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+.au-hero-note{ margin-top:28px; display:flex; align-items:center; gap:10px; color:var(--au-muted); font-size:13.5px; }
+.au-hero-note svg{ flex:none; }
+@media(max-width:1000px){
+  .au-hero-inner{ grid-template-columns:1fr; gap:56px; }
+  .au-hero{ padding:44px 0 88px; }
+  .au-hero-cta{ flex-direction:column; align-items:stretch; }
+  .au-hero-cta .au-btn{ width:100%; }
+}
+
+/* ─── HERO VISUAL: pannello dati, vetro come .agenda__content ─── */
+/* pannello pieno con hairline: il vetro è riservato al calcolatore, così
+   quel trattamento segnala "qui c'è lo strumento" invece di essere decoro */
+.au-viz{
+  position:relative;
+  background:var(--au-panel);
+  border:1px solid var(--au-line); border-radius:20px;
+  padding:32px 32px 40px;
+}
+.au-viz-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.au-viz-label{ font-size:12px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--au-muted); }
+.au-viz-badge{
+  font-size:10.5px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--au-muted);
+  border:1px solid var(--au-line); padding:4px 11px; flex:none;
+}
+.au-viz-big{
+  font-family:'DM Mono',monospace; font-weight:500; font-size:clamp(40px,4.6vw,58px);
+  letter-spacing:-.04em; line-height:1; margin:16px 0 8px;
+}
+.au-viz-sub{ color:var(--au-muted); font-size:13.5px; text-wrap:balance; }
+.au-viz-chart{ margin:28px 0 24px; }
+.au-viz-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+.au-spark{ stroke-dasharray:1000; stroke-dashoffset:1000; }
+.au-viz.au-in .au-spark{ animation:au-draw 2s var(--au-ease) .3s forwards; }
+@keyframes au-draw{ to{ stroke-dashoffset:0; } }
+.au-area{ opacity:0; }
+.au-viz.au-in .au-area{ animation:au-fadein 1.2s ease 1.1s forwards; }
+@keyframes au-fadein{ to{ opacity:1; } }
+.au-viz-rows{ border-top:1px solid var(--au-line); padding-top:18px; display:grid; gap:12px; }
+.au-viz-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; font-size:13px; }
+.au-viz-row span:first-child{ color:var(--au-muted); }
+.au-viz-row b{ font-family:'DM Mono',monospace; font-weight:500; font-size:14px; }
+.au-viz-bar{ flex:1; height:4px; background:rgba(255,255,255,.07); overflow:hidden; max-width:130px; }
+.au-viz-bar i{ display:block; height:100%; width:0; transition:width 1.4s var(--au-ease) .8s; }
+.au-viz.au-in .au-viz-bar i{ width:var(--w); }
+.au-viz-chip{
+  position:absolute; z-index:2; display:flex; align-items:center; gap:8px;
+  background:rgba(12,13,16,.88); backdrop-filter:blur(12px);
+  border:1px solid var(--au-line-2); padding:10px 16px;
+  font-size:12.5px; font-weight:500; white-space:nowrap;
+}
+.au-viz-chip b{ font-family:'DM Mono',monospace; font-weight:500; }
+.au-viz-chip--a{ top:-18px; left:-24px; }
+.au-viz-chip--b{ bottom:-18px; right:28px; }
+@media(max-width:520px){
+  .au-viz{ padding:24px 20px 36px; }
+  .au-viz-chip--a{ left:-6px; top:-16px; }
+  .au-viz-chip--b{ right:8px; bottom:-16px; }
+}
+
+/* ─── 02 INTRODUZIONE ─── */
+.au-intro-grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:44px; align-items:start; }
+@media(max-width:900px){ .au-intro-grid{ grid-template-columns:1fr; gap:52px; } }
+
+.au-ledger{ padding-left:52px; border-left:1px solid var(--au-line); }
+.au-ledger-label{ font-size:12px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--au-muted); margin-bottom:22px; }
+.au-ledger-list{ list-style:none; margin-bottom:40px; }
+.au-ledger-list li{
+  display:flex; gap:18px; align-items:baseline; padding:15px 0;
+  border-bottom:1px solid var(--au-line); font-size:15px; line-height:1.4;
+  transition:padding-left .35s var(--au-ease), color .35s var(--au-ease);
+}
+.au-ledger-list li:hover{ padding-left:10px; color:#fff; }
+.au-ledger-idx{ font-family:'DM Mono',monospace; font-size:11.5px; color:var(--au-blue); flex:none; }
+.au-figs{ display:flex; gap:56px; flex-wrap:wrap; }
+.au-fig-n{ font-family:'DM Mono',monospace; font-weight:500; font-size:clamp(40px,4.4vw,56px); letter-spacing:-.05em; line-height:1; }
+.au-fig-u{ font-family:'DM Mono',monospace; font-size:15px; color:var(--au-muted); margin-left:8px; letter-spacing:0; }
+.au-fig-d{ display:block; color:var(--au-muted); font-size:13.5px; line-height:1.5; margin-top:12px; max-width:200px; text-wrap:balance; }
+.au-fig:first-child .au-fig-n{ color:var(--au-blue); }
+.au-src{ margin-top:30px; font-size:12px; color:var(--au-dim); }
+@media(max-width:900px){ .au-ledger{ padding-left:0; border-left:none; } }
+
+.au-steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:88px; }
+.au-step{ position:relative; padding:32px 44px 0 0; border-top:1px solid var(--au-line); }
+.au-step::before{
+  content:''; position:absolute; top:-1px; left:0; height:1px; width:0;
+  background:currentColor; transition:width 1.1s var(--au-ease);
+}
+.au-steps.au-in .au-step::before{ width:100%; }
+.au-step:nth-child(1){ color:var(--au-blue); }
+.au-step:nth-child(2){ color:var(--au-pink); }
+.au-step:nth-child(3){ color:#ffffff; }
+.au-step:nth-child(2)::before{ transition-delay:.22s; }
+.au-step:nth-child(3)::before{ transition-delay:.44s; }
+.au-step-i{ font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.1em; display:block; margin-bottom:18px; }
+.au-step-t{ font-size:clamp(24px,2.4vw,32px); font-weight:500; letter-spacing:-.025em; color:#fff; margin-bottom:10px; text-wrap:balance; }
+.au-step-d{ color:var(--au-muted); font-size:14.5px; line-height:1.6; max-width:292px; text-wrap:pretty; }
+@media(max-width:760px){
+  .au-steps{ grid-template-columns:1fr; margin-top:56px; }
+  .au-step{ padding:24px 0 28px; }
+}
+
+/* ─── 03 CALCOLATORE (contenitore) ─── */
+.au-calc-section{ padding:104px 0 64px; position:relative; }
+.au-calc-head{ text-align:center; max-width:760px; margin:0 auto 44px; position:relative; z-index:1; }
+.au-calc-head .au-h2{ max-width:none; margin-left:auto; margin-right:auto; }
+.au-calc-head .au-lead{ margin:0 auto; }
+.au-calc-wrap{ max-width:1300px; margin:0 auto; padding:0 24px; position:relative; z-index:1; }
+.au-calc-frame{
+  position:relative;
+  background:var(--au-glass); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--au-line); border-radius:var(--au-radius);
+  padding:28px 40px 0;
+  overflow:hidden;                       /* zero overflow orizzontale dal calcolatore */
+  box-shadow:0 10px 40px rgba(0,0,0,.2);
+}
+@media(max-width:900px){ .au-calc-frame{ padding:14px 12px 4px; border-radius:22px; } }
+@media(max-width:560px){ .au-calc-wrap{ padding:0 14px; } .au-calc-frame{ padding:8px 2px 0; } }
+
+/* Adattamenti del solo CONTENITORE del calcolatore.
+   Nessuna modifica a logica, calcoli, JS, input o risultati. */
+.au-calc-frame .roi-embed{ background:none; }   /* il pannello lo disegna il frame */
+@media(min-width:901px){
+  /* più larghezza alla colonna del risultato: la CTA sta su una riga sola */
+  .au-calc-frame .calc-grid{ grid-template-columns:1fr 1fr 1.5fr; }
+}
+/* "Torna al calcolatore": nel codice fornito sta in cima a sinistra, piccolo
+   e senza bordo, e si perde. Lo script della landing lo riposiziona in fondo
+   alla colonna destra; qui gli diamo la forma di un bottone pieno.
+   onclick e goToCalc() restano quelli forniti. */
+/* CTA "Parla con un esperto" aggiunta in fondo alla colonna destra */
+.au-calc-frame .hs-section .au-hs-cta{ display:flex; width:100%; margin-top:24px; }
+.au-calc-frame .hs-section .back-btn{
+  width:100%; justify-content:center;
+  margin:22px 0 0; padding:13px 24px;
+  border:1px solid var(--au-line-2); border-radius:320px;
+  transition:border-color .25s var(--au-ease), color .25s var(--au-ease), background .25s var(--au-ease);
+}
+.au-calc-frame .hs-section .back-btn:hover{ border-color:#fff; background:rgba(255,255,255,.05); color:#fff; }
+
+/* ─── 04 RISULTATO ─── */
+/* ─── 04 · i 4 vantaggi: accordion orizzontale ─── */
+/* ── A · accordion orizzontale (pattern .accordion__items di Oktoberfest) ── */
+/* contenitore unico con lo stesso raggio del resto della pagina;
+   i pannelli sono ritagliati da overflow:hidden */
+.au-acc{
+  display:flex; height:440px; margin-top:72px;
+  background:var(--au-glass); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--au-line); border-radius:var(--au-radius); overflow:hidden;
+}
+.au-acc-item{
+  position:relative; flex:1 1 0; min-width:0; overflow:hidden;
+  padding:34px 30px; display:flex; flex-direction:column; justify-content:space-between;
+  border-left:1px solid var(--au-line); background:transparent;
+  transition:flex-grow .55s var(--au-ease), background .55s var(--au-ease);
+}
+.au-acc-item:first-child{ border-left:none; }
+.au-acc-item{ outline:none; }
+.au-acc-item:focus-visible{ outline:1px solid var(--au-blue); outline-offset:-1px; }
+.au-acc-item::after{                       /* scrim che sale, come .accordion-item__overlay::after */
+  content:''; position:absolute; inset:auto 0 0 0; height:70%; pointer-events:none;
+  background:linear-gradient(to top, rgba(12,13,16,.9), transparent);
+  opacity:0; transition:opacity .55s var(--au-ease);
+}
+.au-acc-item:hover, .au-acc-item:focus-within{ flex-grow:2.6; background:rgba(255,255,255,.045); }
+.au-acc-item:hover::after, .au-acc-item:focus-within::after{ opacity:1; }
+.au-acc-idx{ position:relative; z-index:2; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.14em; color:var(--au-muted); transition:color .4s var(--au-ease); }
+.au-acc-item:hover .au-acc-idx, .au-acc-item:focus-within .au-acc-idx{ color:var(--au-blue); }
+.au-acc-ghost{ position:absolute; right:-16px; top:2px; font-family:'DM Mono',monospace; font-weight:500; font-size:150px; line-height:1; letter-spacing:-.04em; color:#fff; opacity:.035; pointer-events:none; }
+.au-acc-body{ position:relative; z-index:2; }
+.au-acc-t{ font-size:clamp(19px,1.9vw,25px); font-weight:500; letter-spacing:-.02em; line-height:1.2; text-wrap:balance; }
+.au-acc-d{
+  color:var(--au-muted); font-size:14.5px; line-height:1.6; max-width:34ch;
+  max-height:0; opacity:0; transform:translateY(10px); overflow:hidden;
+  transition:opacity .45s var(--au-ease), transform .45s var(--au-ease), max-height .55s var(--au-ease), margin-top .45s var(--au-ease);
+}
+.au-acc-item:hover .au-acc-d, .au-acc-item:focus-within .au-acc-d{ opacity:1; transform:none; max-height:190px; margin-top:14px; }
+@media(max-width:900px){
+  .au-acc{ flex-direction:column; height:auto; margin-top:48px; border:none; border-radius:0; }
+  .au-acc-item{ border-left:none; border-top:1px solid var(--au-line); padding:28px 0; background:none; }
+  .au-acc-item:first-child{ border-top:none; }
+  .au-acc-item::after{ display:none; }
+  .au-acc-d{ max-height:none; opacity:1; transform:none; margin-top:12px; }
+  .au-acc-ghost{ font-size:92px; top:-6px; right:0; }
+}
+
+/* ─── 06 SOCIAL PROOF ─── */
+.au-proof{ border-top:1px solid var(--au-line); border-bottom:1px solid var(--au-line); }
+.au-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:56px; border-top:1px solid var(--au-line); }
+@media(max-width:760px){ .au-kpis{ grid-template-columns:repeat(2,1fr); } .au-kpi:last-child{ grid-column:1/-1; } }
+.au-kpi{ padding:36px 44px 0 0; }
+.au-kpi + .au-kpi{ padding-left:44px; border-left:1px solid var(--au-line); }
+.au-kpi-num{
+  font-family:'DM Mono',monospace; font-weight:500; font-size:clamp(34px,3.8vw,50px);
+  letter-spacing:-.05em; line-height:1; color:#fff; display:block;
+}
+.au-kpi-label{ color:var(--au-muted); font-size:14px; margin-top:14px; line-height:1.5; }
+.au-marquee{
+  margin-top:64px; position:relative; overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+.au-marquee-track{ display:flex; gap:64px; width:max-content; animation:au-scroll 38s linear infinite; align-items:center; }
+.au-marquee:hover .au-marquee-track{ animation-play-state:paused; }
+@keyframes au-scroll{ to{ transform:translateX(-50%); } }
+/* i loghi clienti arrivano in colori misti (bianchi e scuri):
+   brightness(0) invert(1) li normalizza tutti in bianco monocromatico */
+.au-marquee img{ height:32px; width:auto; opacity:.42; filter:brightness(0) invert(1); transition:opacity .3s; flex:none; }
+.au-marquee img:hover{ opacity:.95; }
+
+/* ─── 07 CTA FINALE ─── */
+/* niente box: la chiusura sta sulla pagina, con più aria e un titolo più
+   grande al posto del contenitore */
+.au-final{ padding:150px 0 140px; }
+.au-final-box{ position:relative; text-align:center; }
+.au-final-box .au-h2{
+  font-size:clamp(38px,5.4vw,68px); line-height:1.03;
+  max-width:880px; margin-left:auto; margin-right:auto;
+}
+.au-final-box .au-lead{ margin:0 auto; }
+.au-final-q{ font-size:19px; font-weight:500; color:#fff; margin:26px auto 0; max-width:640px; text-wrap:balance; }
+.au-final-sub{ margin-top:40px; padding-top:40px; border-top:1px solid var(--au-line); }
+.au-final-sub .au-h3{ font-size:23px; margin-bottom:12px; }
+.au-final-sub p{ color:var(--au-muted); font-size:15px; line-height:1.7; max-width:560px; margin:0 auto 32px; text-wrap:pretty; }
+.au-final-cta{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+@media(max-width:600px){
+  .au-final{ padding:96px 0 88px; }
+  .au-final-cta{ flex-direction:column; }
+  .au-final-cta .au-btn{ width:100%; }
+}
+
+/* ─── 08 FAQ ─── */
+/* stesso materiale dell'accordion e del calcolatore: vetro + raggio.
+   Le righe occupano tutta la larghezza; solo la risposta resta stretta. */
+.au-faq{
+  margin:48px 0 0;
+  background:var(--au-glass); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--au-line); border-radius:var(--au-radius); overflow:hidden;
+}
+.au-faq details{ border-bottom:1px solid var(--au-line); }
+.au-faq details:last-child{ border-bottom:none; }
+.au-faq summary{
+  list-style:none; cursor:pointer; padding:28px 72px 28px 36px; position:relative;
+  font-size:clamp(17px,1.7vw,21px); font-weight:500; letter-spacing:-.015em; text-wrap:balance;
+  transition:color .25s var(--au-ease);
+}
+.au-faq summary::-webkit-details-marker{ display:none; }
+.au-faq summary:hover{ color:var(--au-blue); }
+.au-faq summary:hover{ background:rgba(255,255,255,.02); }
+.au-faq summary::after{
+  content:''; position:absolute; right:36px; top:50%; width:11px; height:11px;
+  border-right:1.5px solid var(--au-muted); border-bottom:1.5px solid var(--au-muted);
+  transform:translateY(-70%) rotate(45deg); transition:transform .35s var(--au-ease), border-color .3s;
+}
+.au-faq details[open] summary::after{ transform:translateY(-20%) rotate(-135deg); border-color:var(--au-blue); }
+.au-faq-a{ padding:0 72px 30px 36px; max-width:756px; color:var(--au-muted); font-size:15px; line-height:1.75; text-wrap:pretty; animation:au-faq-in .4s var(--au-ease); }
+@media(max-width:600px){
+  .au-faq summary{ padding:24px 48px 24px 22px; }
+  .au-faq summary::after{ right:22px; }
+  .au-faq-a{ padding:0 22px 26px; }
+}
+.au-faq-a a{ color:var(--au-blue); text-decoration:underline; text-underline-offset:4px; }
+@keyframes au-faq-in{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+
+/* ─── 09 FOOTER ─── */
+.au-footer{ border-top:1px solid var(--au-line); padding:72px 0 44px; }
+.au-footer-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:40px; flex-wrap:wrap; }
+.au-footer-logo svg{ width:152px; height:auto; display:block; }
+.au-footer-tag{ color:var(--au-muted); font-size:14px; margin-top:18px; max-width:34ch; }
+.au-footer-nav{ display:flex; gap:60px; flex-wrap:wrap; }
+.au-footer-col h4{ font-size:12px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--au-dim); margin-bottom:18px; }
+.au-footer-col a{ display:block; color:rgba(255,255,255,.72); text-decoration:none; font-size:14px; margin-bottom:12px; transition:color .25s; }
+.au-footer-col a:hover{ color:var(--au-blue); }
+.au-footer-bottom{
+  margin-top:56px; padding-top:28px; border-top:1px solid var(--au-line);
+  display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;
+  color:var(--au-muted); font-size:13px;
+}
+.au-footer-bottom a{ color:var(--au-muted); text-decoration:none; }
+.au-footer-bottom a:hover{ color:#fff; }
+@media(max-width:700px){ .au-footer-nav{ gap:36px; } }
+
+/* ─── accessibilità ─── */
+@media(prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  .au-reveal{ opacity:1; transform:none; transition:none; }
+  .au-marquee-track, .au-glow i{ animation:none; }
+  .au-spark{ stroke-dashoffset:0; }
+  .au-area{ opacity:1; }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CALCOLATORE ROI — CSS FORNITO DAL CLIENTE (non modificato)
+     unica modifica consentita: il selettore `body` è stato portato
+     sul wrapper `.roi-embed` per l'integrazione nella pagina
+     ══════════════════════════════════════════════════════════════ -->
+<style>
+<!--CALC_CSS-->
+</style>
+</head>
+<body>
+
+<!-- fondo ambientale animato -->
+<div class="au-glow" aria-hidden="true"><i></i><i></i></div>
+
+<!-- ─────────────────────────── NAV ─────────────────────────── -->
+<div class="au-nav-wrap">
+  <nav class="au-nav">
+    <a class="au-nav-logo" href="https://www.aufinity.com/it" aria-label="Aufinity"><!--LOGO--></a>
+    <div class="au-nav-links">
+      <a href="#problema">Il problema</a>
+      <a href="#calcolatore">Calcolatore</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="au-btn au-btn-primary au-btn-sm" href="#calcolatore"><span>Calcola il tuo ROI</span></a>
+  </nav>
+</div>
+
+<!-- ─────────────────── 01 · HERO ─────────────────── -->
+<section class="au-hero">
+  <div class="au-hero-grid"></div>
+  <div class="au-wrap au-hero-inner">
+
+    <div class="au-hero-copy">
+      <span class="au-eyebrow au-reveal">Aufinity ROI Calculator</span>
+      <h1 class="au-h1 au-reveal" data-d="1">Quanto denaro sta perdendo la tua concessionaria <span class="au-blue">ogni mese?</span></h1>
+      <p class="au-lead au-reveal" data-d="2">Scoprilo in pochi secondi con il Calcolatore ROI di Aufinity.</p>
+      <div class="au-hero-cta au-reveal" data-d="3">
+        <a class="au-btn au-btn-primary" href="#calcolatore">
+          <span>Calcola il tuo potenziale di risparmio</span>
+          <svg class="au-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="au-hero-note au-reveal" data-d="4">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#009df9" stroke-width="2.4" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        30 secondi · 3 dati · nessun impegno
+      </div>
+    </div>
+
+    <!-- visual: composizione dati minimale, nessuna stock photo -->
+    <div class="au-viz au-reveal" data-d="2">
+      <div class="au-viz-chip au-viz-chip--a"><span class="au-blue">↑</span> <b>+810 h</b> <span style="color:var(--au-muted)">recuperate / anno</span></div>
+      <div class="au-viz-chip au-viz-chip--b"><span class="au-pink">↓</span> <b>−20 min</b> <span style="color:var(--au-muted)">per transazione</span></div>
+
+      <div class="au-viz-head">
+        <div class="au-viz-label">Recupero finanziario annuale</div>
+        <div class="au-viz-badge">Esempio</div>
+      </div>
+      <div class="au-viz-big" data-count-to="24300" data-prefix="€ " data-sep="1">€ 0</div>
+      <div class="au-viz-sub">Concessionaria tipo · 35 vendite e 300 servizi officina al mese, a 30 €/h</div>
+
+      <div class="au-viz-chart" aria-hidden="true">
+        <svg viewBox="0 0 420 140" preserveAspectRatio="none" role="presentation">
+          <defs>
+            <linearGradient id="auArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#009df9" stop-opacity=".34"/>
+              <stop offset="100%" stop-color="#009df9" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g stroke="rgba(255,255,255,.05)" stroke-width="1">
+            <line x1="0" y1="35"  x2="420" y2="35"/>
+            <line x1="0" y1="70"  x2="420" y2="70"/>
+            <line x1="0" y1="105" x2="420" y2="105"/>
+          </g>
+          <path class="au-area" fill="url(#auArea)" d="M0,118 C60,112 96,100 140,88 C190,74 226,56 276,40 C320,26 360,18 420,10 L420,140 L0,140 Z"/>
+          <path class="au-spark" fill="none" stroke="#009df9" stroke-width="2.4" stroke-linecap="round"
+                d="M0,118 C60,112 96,100 140,88 C190,74 226,56 276,40 C320,26 360,18 420,10"/>
+          <path fill="none" stroke="rgba(241,61,101,.5)" stroke-width="1.6" stroke-dasharray="4 5"
+                d="M0,120 C80,120 160,121 240,122 C320,123 380,124 420,124"/>
+        </svg>
+      </div>
+
+      <div class="au-viz-rows">
+        <div class="au-viz-row">
+          <span>Vendite</span>
+          <div class="au-viz-bar"><i style="--w:26%;background:#009df9"></i></div>
+          <b>210 h</b>
+        </div>
+        <div class="au-viz-row">
+          <span>Officina</span>
+          <div class="au-viz-bar"><i style="--w:74%;background:#009df9"></i></div>
+          <b>600 h</b>
+        </div>
+        <div class="au-viz-row">
+          <span>Ore manuali oggi</span>
+          <div class="au-viz-bar"><i style="--w:100%;background:#f13d65"></i></div>
+          <b style="color:var(--au-pink)">810 h</b>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─────────────────── 02 · INTRODUZIONE ─────────────────── -->
+<section class="au-section au-section--tight" id="problema">
+  <div class="au-wrap au-intro-grid" style="position:relative;z-index:1">
+    <div>
+      <h2 class="au-h2 au-reveal" data-d="1">Quanto ti costa oggi gestire i pagamenti manualmente?</h2>
+      <p class="au-body au-reveal" data-d="2">Ogni pagamento gestito manualmente significa tempo sottratto al team della concessionaria, costi operativi e risorse che dovrebbero essere destinate ad attività più produttive.</p>
+      <p class="au-body au-reveal" data-d="2">Il ROI Calculator ti permette di trasformare questi costi in un valore concreto.</p>
+    </div>
+
+    <aside class="au-ledger au-reveal" data-d="2">
+      <div class="au-ledger-label">Dove finisce il tempo</div>
+      <ul class="au-ledger-list">
+        <li><span class="au-ledger-idx">01</span>Invio delle richieste di pagamento</li>
+        <li><span class="au-ledger-idx">02</span>Verifica degli incassi e degli importi</li>
+        <li><span class="au-ledger-idx">03</span>Solleciti e rincorsa dei pagamenti</li>
+        <li><span class="au-ledger-idx">04</span>Riconciliazione con il gestionale</li>
+        <li><span class="au-ledger-idx">05</span>Gestione di contanti e assegni</li>
+      </ul>
+
+      <div class="au-figs">
+        <div class="au-fig">
+          <div><span class="au-fig-n">30</span><span class="au-fig-u">min</span></div>
+          <span class="au-fig-d">per ogni vendita</span>
+        </div>
+        <div class="au-fig">
+          <div><span class="au-fig-n">10</span><span class="au-fig-u">min</span></div>
+          <span class="au-fig-d">per ogni passaggio in officina</span>
+        </div>
+      </div>
+      <p class="au-src">Studio MSI 2026 · 41% del mercato spagnolo</p>
+    </aside>
+  </div>
+
+  <div class="au-wrap" style="position:relative;z-index:1">
+    <div class="au-steps au-reveal">
+      <div class="au-step">
+        <span class="au-step-i">01</span>
+        <div class="au-step-t">Tempo</div>
+        <p class="au-step-d">Ore che il team spende ogni mese in attività ripetitive.</p>
+      </div>
+      <div class="au-step">
+        <span class="au-step-i">02</span>
+        <div class="au-step-t">Costi</div>
+        <p class="au-step-d">Ogni ora si traduce in margine che non vedi mai.</p>
+      </div>
+      <div class="au-step">
+        <span class="au-step-i">03</span>
+        <div class="au-step-t">Risparmio</div>
+        <p class="au-step-d">Il valore che puoi riportare a bilancio automatizzando.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────── 03 · ROI CALCULATOR ─────────────────── -->
+<section class="au-calc-section" id="calcolatore">
+  <div class="au-wrap">
+    <div class="au-calc-head">
+      <span class="au-eyebrow au-reveal">Calcolatore</span>
+      <h2 class="au-h2 au-reveal" data-d="1">Scopri quanto puoi risparmiare</h2>
+      <p class="au-lead au-reveal" data-d="2">Il Calcolatore ROI di Aufinity ti mostra, sulla base dei dati della tua azienda, <strong>quanto tempo e denaro puoi recuperare digitalizzando la gestione dei pagamenti</strong>. Inserisci pochi dati e ottieni subito una stima concreta del tuo potenziale risparmio.</p>
+    </div>
+  </div>
+
+  <!-- ═══ CONTAINER DEL CALCOLATORE ═══
+       Contiene il codice fornito dal cliente: HTML, CSS e JS non modificati.
+       Il wrapper gestisce solo posizionamento, spaziature e responsività. -->
+  <div class="au-calc-wrap">
+    <div class="au-calc-frame">
+      <div class="roi-embed">
+<!--CALC_HTML-->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────── 04 · RISULTATO ─────────────────── -->
+<section class="au-section">
+  <div class="au-wrap">
+    <h2 class="au-h2 au-h2--wide au-reveal" data-d="1">Il Calcolatore ROI ti aiuta a quantificare i vantaggi per la tua concessionaria</h2>
+    <p class="au-lead au-reveal" data-d="2">Il valore mostrato dal calcolatore rappresenta il potenziale economico legato alla riduzione delle attività manuali nella gestione dei pagamenti. Con Aufinity puoi trasformare questo potenziale in maggiore efficienza operativa.</p>
+
+    <div class="au-acc au-reveal">
+      <div class="au-acc-item" tabindex="0">
+        <span class="au-acc-ghost">01</span>
+        <div class="au-acc-idx">01</div>
+        <div class="au-acc-body">
+          <div class="au-acc-t">Più tempo per il tuo team</div>
+          <p class="au-acc-d">Riducendo le attività manuali legate alla gestione dei pagamenti.</p>
+        </div>
+      </div>
+      <div class="au-acc-item" tabindex="0">
+        <span class="au-acc-ghost">02</span>
+        <div class="au-acc-idx">02</div>
+        <div class="au-acc-body">
+          <div class="au-acc-t">Meno costi operativi</div>
+          <p class="au-acc-d">Riducendo il tempo e le risorse necessari per mantenere questi processi manualmente.</p>
+        </div>
+      </div>
+      <div class="au-acc-item" tabindex="0">
+        <span class="au-acc-ghost">03</span>
+        <div class="au-acc-idx">03</div>
+        <div class="au-acc-body">
+          <div class="au-acc-t">Maggiori risorse da recuperare</div>
+          <p class="au-acc-d">Grazie a una gestione digitale e automatizzata dei pagamenti.</p>
+        </div>
+      </div>
+      <div class="au-acc-item" tabindex="0">
+        <span class="au-acc-ghost">04</span>
+        <div class="au-acc-idx">04</div>
+        <div class="au-acc-body">
+          <div class="au-acc-t">Costo dell'inefficienza ridotto</div>
+          <p class="au-acc-d">Con una stima del risparmio annuo ottenibile digitalizzando e automatizzando la gestione dei pagamenti.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─────────────────── 06 · SOCIAL PROOF ─────────────────── -->
+<section class="au-section au-proof">
+  <div class="au-wrap">
+    <h2 class="au-h2 au-h2--wide au-reveal" data-d="1">Scelto dalle concessionarie di tutta Europa</h2>
+
+    <div class="au-kpis">
+      <div class="au-kpi au-reveal" data-d="1">
+        <span class="au-kpi-num" data-count-to="1500" data-suffix="+" data-sep="1">0</span>
+        <div class="au-kpi-label">concessionari</div>
+      </div>
+      <div class="au-kpi au-reveal" data-d="2">
+        <span class="au-kpi-num" data-count-to="10" data-prefix="€ " data-suffix="+ mld">0</span>
+        <div class="au-kpi-label">di volume di pagamenti gestito</div>
+      </div>
+      <div class="au-kpi au-reveal" data-d="3">
+        <span class="au-kpi-num" data-count-to="20" data-suffix=" min">0</span>
+        <div class="au-kpi-label">di tempo medio risparmiato per transazione</div>
+      </div>
+    </div>
+
+    <div class="au-marquee au-reveal" data-d="2" aria-hidden="true">
+      <div class="au-marquee-track"><!--LOGOS--></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────── 07 · CTA FINALE ─────────────────── -->
+<section class="au-final" id="demo">
+  <div class="au-wrap">
+    <div class="au-final-box au-reveal">
+      <h2 class="au-h2">E se quel costo potessi eliminarlo?</h2>
+      <p class="au-lead">Aufinity digitalizza e automatizza la gestione dei pagamenti, dagli inviti di pagamento alle conferme, riducendo il lavoro manuale e semplificando i processi per il tuo team.</p>
+      <p class="au-final-q">Vuoi capire cosa significa per la tua concessionaria?</p>
+
+      <div class="au-final-sub">
+        <h3 class="au-h3">Parla con un esperto Aufinity</h3>
+        <p>Lascia i tuoi dati. Un nostro consulente analizzerà insieme a te il risultato del calcolatore e ti mostrerà dove puoi recuperare efficienza.</p>
+        <div class="au-final-cta">
+          <a class="au-btn au-btn-primary" href="https://www.aufinity.com/it/consulenza">
+            <span>Parla con un esperto</span>
+            <svg class="au-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a class="au-btn au-btn-ghost" href="#calcolatore"><span>Ricalcola il tuo ROI</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────── 08 · FAQ ─────────────────── -->
+<section class="au-section au-section--tight" id="faq">
+  <div class="au-wrap">
+    <h2 class="au-h2 au-reveal" data-d="1">Domande frequenti</h2>
+
+    <div class="au-faq au-reveal" data-d="2">
+      <details name="au-faq">
+        <summary>Il Calcolatore ROI è gratuito?</summary>
+        <div class="au-faq-a">Sì. Puoi utilizzarlo gratuitamente per stimare il potenziale di risparmio della tua concessionaria.</div>
+      </details>
+      <details name="au-faq">
+        <summary>Quali dati devo inserire?</summary>
+        <div class="au-faq-a">Ti bastano tre informazioni: vendite mensili, servizi officina mensili e costo orario interno.</div>
+      </details>
+      <details name="au-faq">
+        <summary>Come viene calcolato il potenziale di risparmio?</summary>
+        <div class="au-faq-a">La stima considera il volume di attività inserito e il tempo mediamente dedicato alle operazioni manuali di vendita e postvendita.</div>
+      </details>
+      <details name="au-faq">
+        <summary>Il risultato è una cifra garantita?</summary>
+        <div class="au-faq-a">No. È una <strong>stima del potenziale di recupero</strong>, calcolata sulla base dei dati inseriti e della metodologia adottata dal modello.</div>
+      </details>
+      <details name="au-faq">
+        <summary>Dopo aver usato il calcolatore devo acquistare Aufinity?</summary>
+        <div class="au-faq-a">No. Il calcolatore serve prima di tutto a capire <strong>quanto incidono oggi i processi manuali sulla tua concessionaria</strong>. Se vuoi approfondire il risultato, puoi scegliere di <a href="https://www.aufinity.com/it/consulenza">parlare con un esperto Aufinity</a>.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────── 09 · FOOTER ─────────────────── -->
+<footer class="au-footer">
+  <div class="au-wrap">
+    <div class="au-footer-top">
+      <div>
+        <a class="au-footer-logo" href="https://www.aufinity.com/it" aria-label="Aufinity"><!--LOGO--></a>
+        <p class="au-footer-tag">Gestione digitale dei pagamenti per le concessionarie auto.</p>
+        <a class="au-btn au-btn-light au-btn-sm" href="https://www.aufinity.com/it/consulenza" style="margin-top:24px">
+          <span>Parla con un esperto</span>
+        </a>
+      </div>
+
+      <div class="au-footer-nav">
+        <div class="au-footer-col">
+          <h4>Piattaforma</h4>
+          <a href="https://www.aufinity.com/it/piattaforma/valore-aggiunto-per-le-concessionarie-auto">Valore aggiunto</a>
+          <a href="https://www.aufinity.com/it/piattaforma/gestione-dei-pagamenti-digitali">Pagamenti digitali</a>
+          <a href="https://www.aufinity.com/it/piattaforma/sollecito-automatico">Sollecito automatico</a>
+        </div>
+        <div class="au-footer-col">
+          <h4>Azienda</h4>
+          <a href="https://www.aufinity.com/it/azienda/l-azienda">L'azienda</a>
+          <a href="https://www.aufinity.com/it/casi/sasi-di-successo">Casi di successo</a>
+          <a href="https://www.aufinity.com/it/news/news">News</a>
+        </div>
+        <div class="au-footer-col">
+          <h4>Contatti</h4>
+          <a href="https://www.aufinity.com/it/contatto">Contatto</a>
+          <a href="https://www.aufinity.com/it/consulenza">Prenota un appuntamento</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="au-footer-bottom">
+      <span>© <span id="au-year">2026</span> Aufinity Group GmbH</span>
+      <span style="display:flex;gap:24px;flex-wrap:wrap">
+        <a href="https://www.aufinity.com/it/impronta-e-privacy">Privacy</a>
+        <a href="https://www.aufinity.com/it/impronta-e-privacy">Cookie</a>
+        <a href="https://www.aufinity.com/it/contatto">Contatti</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════════
+     LANDING SCRIPT — agisce SOLO su elementi .au-*
+     nessuna interazione con il calcolatore
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* anno footer */
+  var y = document.getElementById('au-year');
+  if(y) y.textContent = new Date().getFullYear();
+
+  /* ─── colonna destra della schermata risultati ───
+     Ci appendiamo la CTA "Parla con un esperto" e, sotto, il "Torna al
+     calcolatore" del calcolatore. Del bottone fornito spostiamo solo il nodo:
+     onclick e goToCalc() restano intatti. */
+  var backBtn = document.querySelector('.au-calc-frame .back-btn');
+  var hsCol   = document.querySelector('.au-calc-frame .hs-section');
+  if(hsCol){
+    var expert = document.createElement('a');
+    expert.className = 'au-btn au-btn-primary au-hs-cta';
+    expert.href = 'https://www.aufinity.com/it/consulenza';
+    expert.innerHTML = '<span>Parla con un esperto</span>' +
+      '<svg class="au-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    hsCol.appendChild(expert);
+    if(backBtn) hsCol.appendChild(backBtn);
+  }
+
+  /* ─── reveal on scroll ─── */
+  var targets = document.querySelectorAll('.au-reveal');
+  if(reduce || !('IntersectionObserver' in window)){
+    targets.forEach(function(el){ el.classList.add('au-in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('au-in'); io.unobserve(e.target); }
+      });
+    }, { threshold:.12, rootMargin:'0px 0px -8% 0px' });
+    targets.forEach(function(el){ io.observe(el); });
+  }
+
+  /* ─── FAQ: una aperta alla volta ───
+     I browser recenti lo fanno da soli con details[name]; qui il fallback. */
+  var faqs = document.querySelectorAll('.au-faq details');
+  if(!('name' in document.createElement('details'))){
+    faqs.forEach(function(d){
+      d.addEventListener('toggle', function(){
+        if(d.open) faqs.forEach(function(o){ if(o !== d) o.open = false; });
+      });
+    });
+  }
+
+  /* ─── count-up sui numeri (KPI + hero) ─── */
+  var nums = document.querySelectorAll('[data-count-to]');
+  function fmt(el, v){
+    var dec = el.dataset.sep ? 0 : (String(el.dataset.countTo).indexOf('.') > -1 ? 1 : 0);
+    var s = el.dataset.sep
+      ? Math.round(v).toLocaleString('it-IT', { useGrouping:true })   /* 1.500, non 1500 */
+      : v.toFixed(dec);
+    return (el.dataset.prefix || '') + s + (el.dataset.suffix || '');
+  }
+  function run(el){
+    var to = parseFloat(el.dataset.countTo), start = null, dur = 1600;
+    if(reduce){ el.textContent = fmt(el, to); return; }
+    function step(t){
+      if(start === null) start = t;
+      var p = Math.min((t - start) / dur, 1);
+      var e = 1 - Math.pow(1 - p, 3);           /* easeOutCubic */
+      el.textContent = fmt(el, to * e);
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if(!('IntersectionObserver' in window)){
+    nums.forEach(run);
+  } else {
+    var ioN = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ run(e.target); ioN.unobserve(e.target); }
+      });
+    }, { threshold:.4 });
+    nums.forEach(function(el){ ioN.observe(el); });
+  }
+
+  /* ─── marquee: duplica i loghi per lo scroll infinito ─── */
+  var track = document.querySelector('.au-marquee-track');
+  if(track && !reduce) track.innerHTML += track.innerHTML;
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CALCOLATORE ROI — JS FORNITO DAL CLIENTE (non modificato)
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+<!--CALC_JS-->
+</script>
+
+</body>
+</html>
