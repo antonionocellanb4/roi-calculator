@@ -341,6 +341,54 @@ body{
   .au-calc-frame .au-res-actions .back-btn{ width:100%; justify-content:center; }
 }
 
+/* ─── testi piccoli del calcolatore, +2px ───
+   Richiesta del cliente. Sono override nel foglio della landing, scoped su
+   .au-calc-frame: src/roi_calculator.html resta intatto e basta togliere
+   questo blocco per tornare alle dimensioni originali.
+   .cta-btn resta a 15px di proposito: ingrandendolo l'etichetta torna su
+   due righe, che avevamo appena sistemato allargando la colonna. */
+.au-calc-frame .estimacion-badge,
+.au-calc-frame .rkpi-estimacion{ font-size:12px; }
+
+.au-calc-frame .page-eyebrow,
+.au-calc-frame .card-label,
+.au-calc-frame .result-eyebrow,
+.au-calc-frame .source-line,
+.au-calc-frame .rkpi-label,
+.au-calc-frame .breakdown-row.header,
+.au-calc-frame .source-note,
+.au-calc-frame .input-summary-title{ font-size:13px; }
+
+.au-calc-frame .rkpi-sub,
+.au-calc-frame .back-inline-btn,
+.au-calc-frame .tooltip-box{ font-size:14px; }
+
+.au-calc-frame .input-label,
+.au-calc-frame .input-unit,
+.au-calc-frame .metric-label,
+.au-calc-frame .result-sub,
+.au-calc-frame .result-detail-row,
+.au-calc-frame .breakdown-row,
+.au-calc-frame .input-summary-row,
+.au-calc-frame .hs-section-header p{ font-size:15px; }
+
+.au-calc-frame .results-header p,
+.au-calc-frame .back-btn{ font-size:16px; }
+
+.au-calc-frame .page-header p,
+.au-calc-frame .metric-value{ font-size:16.5px; }
+
+/* con l'etichetta piu' grande serve piu' respiro, altrimenti va a capo prima */
+.au-calc-frame .metric-label{ max-width:180px; }
+.au-calc-frame .result-sub{ max-width:320px; }
+
+/* il form HubSpot usa !important: per scavalcarlo serve piu' specificita' */
+.au-calc-frame #hs-form-container .hs-form-field label{ font-size:14px !important; }
+.au-calc-frame #hs-form-container input[type="text"],
+.au-calc-frame #hs-form-container input[type="email"],
+.au-calc-frame #hs-form-container input[type="tel"],
+.au-calc-frame #hs-form-container select{ font-size:16.5px !important; }
+
 /* HubSpot rende il consenso privacy dentro una <ul>: via il pallino */
 .au-calc-frame #hs-form-container ul{ list-style:none; margin:0; padding:0; }
 .au-calc-frame #hs-form-container li{ list-style:none; }
