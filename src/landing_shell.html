@@ -993,6 +993,27 @@ body{
     targets.forEach(function(el){ io.observe(el); });
   }
 
+  /* ─── etichetta del submit HubSpot ───
+     "Fissare un appuntamento" arriva dalla configurazione del form su
+     HubSpot, non dal nostro codice: la correzione definitiva va fatta li'.
+     Qui la sovrascriviamo appena il form compare. Serve un observer e non
+     un polling a tempo: il form viene creato solo quando l'utente clicca la
+     CTA del calcolatore, che puo' succedere molto dopo il caricamento. */
+  var hsBox = document.querySelector('.au-calc-frame #hs-form-container');
+  if(hsBox){
+    var hsLabel = 'Prenota una consulenza';
+    var setHsLabel = function(){
+      var b = hsBox.querySelector('input[type="submit"], .hs-button');
+      if(!b) return;
+      if(b.value !== undefined && b.value !== hsLabel) b.value = hsLabel;
+      else if(b.value === undefined && b.textContent !== hsLabel) b.textContent = hsLabel;
+    };
+    if('MutationObserver' in window){
+      new MutationObserver(setHsLabel).observe(hsBox, { childList:true, subtree:true });
+    }
+    setHsLabel();
+  }
+
   /* ─── FAQ: una aperta alla volta ───
      I browser recenti lo fanno da soli con details[name]; qui il fallback. */
   var faqs = document.querySelectorAll('.au-faq details');
