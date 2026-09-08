@@ -344,6 +344,8 @@ body{
 /* HubSpot rende il consenso privacy dentro una <ul>: via il pallino */
 .au-calc-frame #hs-form-container ul{ list-style:none; margin:0; padding:0; }
 .au-calc-frame #hs-form-container li{ list-style:none; }
+.au-calc-frame #hs-form-container a{ color:var(--au-blue); text-decoration-color:rgba(0,157,249,.45); }
+.au-calc-frame #hs-form-container a:hover{ color:#4cbcff; text-decoration-color:currentColor; }
 
 /* ─── 04 RISULTATO ─── */
 /* ─── 04 · i 4 vantaggi: accordion orizzontale ─── */
@@ -1348,12 +1350,13 @@ body{
 
   /* ─── azioni della schermata risultati ───
      "Parla con un nostro esperto" e "Torna al calcolatore" vanno in fondo
-     alla colonna sinistra, sotto il riepilogo dati, affiancati e centrati.
+     a .results-wrap: sotto tutte le informazioni, affiancati e centrati
+     sulla larghezza piena del contenitore.
      Del bottone fornito si sposta solo il nodo: onclick e goToCalc()
      restano intatti. */
   var backBtn = document.querySelector('.au-calc-frame .back-btn');
-  var resLeft = document.querySelector('.au-calc-frame .results-left');
-  if(resLeft){
+  var resWrap = document.querySelector('.au-calc-frame .results-wrap');
+  if(resWrap){
     var expert = document.createElement('a');
     expert.className = 'au-btn au-btn-primary au-hs-cta';
     expert.href = 'https://www.aufinity.com/it/consulenza';
@@ -1364,7 +1367,7 @@ body{
     actions.className = 'au-res-actions';
     actions.appendChild(expert);
     if(backBtn) actions.appendChild(backBtn);
-    resLeft.appendChild(actions);
+    resWrap.appendChild(actions);
   }
 
   /* ─── reveal on scroll ─── */
