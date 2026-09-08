@@ -320,19 +320,30 @@ body{
   /* più larghezza alla colonna del risultato: la CTA sta su una riga sola */
   .au-calc-frame .calc-grid{ grid-template-columns:1fr 1fr 1.5fr; }
 }
-/* "Torna al calcolatore": nel codice fornito sta in cima a sinistra, piccolo
-   e senza bordo, e si perde. Lo script della landing lo riposiziona in fondo
-   alla colonna destra; qui gli diamo la forma di un bottone pieno.
-   onclick e goToCalc() restano quelli forniti. */
-/* CTA "Parla con un nostro esperto" aggiunta in fondo alla colonna destra */
-.au-calc-frame .hs-section .au-hs-cta{ display:flex; width:100%; margin-top:24px; }
-.au-calc-frame .hs-section .back-btn{
-  width:100%; justify-content:center;
-  margin:22px 0 0; padding:13px 24px;
+/* Le due azioni stanno in fondo alla colonna sinistra, sotto il riepilogo
+   dati, affiancate e centrate. A spostarle e' lo script della landing:
+   del "Torna al calcolatore" fornito si muove solo il nodo, onclick e
+   goToCalc() restano intatti. */
+.au-calc-frame .au-res-actions{
+  display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap;
+  margin-top:30px; padding-top:28px; border-top:1px solid var(--au-line);
+}
+.au-calc-frame .au-res-actions .au-hs-cta{ margin:0; }
+.au-calc-frame .au-res-actions .back-btn{
+  margin:0; padding:13px 26px;
   border:1px solid var(--au-line-2); border-radius:320px;
   transition:border-color .25s var(--au-ease), color .25s var(--au-ease), background .25s var(--au-ease);
 }
-.au-calc-frame .hs-section .back-btn:hover{ border-color:#fff; background:rgba(255,255,255,.05); color:#fff; }
+.au-calc-frame .au-res-actions .back-btn:hover{ border-color:#fff; background:rgba(255,255,255,.05); color:#fff; }
+@media(max-width:560px){
+  .au-calc-frame .au-res-actions{ flex-direction:column; align-items:stretch; }
+  .au-calc-frame .au-res-actions .au-hs-cta,
+  .au-calc-frame .au-res-actions .back-btn{ width:100%; justify-content:center; }
+}
+
+/* HubSpot rende il consenso privacy dentro una <ul>: via il pallino */
+.au-calc-frame #hs-form-container ul{ list-style:none; margin:0; padding:0; }
+.au-calc-frame #hs-form-container li{ list-style:none; }
 
 /* ─── 04 RISULTATO ─── */
 /* ─── 04 · i 4 vantaggi: accordion orizzontale ─── */
@@ -877,21 +888,25 @@ body{
   var y = document.getElementById('au-year');
   if(y) y.textContent = new Date().getFullYear();
 
-  /* ─── colonna destra della schermata risultati ───
-     Ci appendiamo la CTA "Parla con un nostro esperto" e, sotto, il "Torna al
-     calcolatore" del calcolatore. Del bottone fornito spostiamo solo il nodo:
-     onclick e goToCalc() restano intatti. */
+  /* ─── azioni della schermata risultati ───
+     "Parla con un nostro esperto" e "Torna al calcolatore" vanno in fondo
+     alla colonna sinistra, sotto il riepilogo dati, affiancati e centrati.
+     Del bottone fornito si sposta solo il nodo: onclick e goToCalc()
+     restano intatti. */
   var backBtn = document.querySelector('.au-calc-frame .back-btn');
-  var hsCol   = document.querySelector('.au-calc-frame .hs-section');
-  if(hsCol){
+  var resLeft = document.querySelector('.au-calc-frame .results-left');
+  if(resLeft){
     var expert = document.createElement('a');
     expert.className = 'au-btn au-btn-primary au-hs-cta';
     expert.href = 'https://www.aufinity.com/it/consulenza';
     expert.innerHTML = '<span>Parla con un nostro esperto</span>' +
       '<svg class="au-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
       'stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-    hsCol.appendChild(expert);
-    if(backBtn) hsCol.appendChild(backBtn);
+    var actions = document.createElement('div');
+    actions.className = 'au-res-actions';
+    actions.appendChild(expert);
+    if(backBtn) actions.appendChild(backBtn);
+    resLeft.appendChild(actions);
   }
 
   /* ─── reveal on scroll ─── */
@@ -906,20 +921,6 @@ body{
     }, { threshold:.12, rootMargin:'0px 0px -8% 0px' });
     targets.forEach(function(el){ io.observe(el); });
   }
-
-  /* ─── etichetta del submit HubSpot ───
-     "Fissare un appuntamento" arriva dalla configurazione del form su
-     HubSpot, non dal nostro codice. Qui la sovrascriviamo appena il form
-     e' renderizzato; la correzione definitiva va fatta su HubSpot. */
-  var hsLabel = 'Prenota una consulenza';
-  (function fixHsLabel(tries){
-    var b = document.querySelector('#hs-form-container input[type="submit"], #hs-form-container .hs-button');
-    if(b){
-      if(b.value !== undefined) b.value = hsLabel; else b.textContent = hsLabel;
-      return;
-    }
-    if(tries > 0) setTimeout(function(){ fixHsLabel(tries - 1); }, 300);
-  })(40);
 
   /* ─── FAQ: una aperta alla volta ───
      I browser recenti lo fanno da soli con details[name]; qui il fallback. */
