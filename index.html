@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aufinity — ROI Calculator per concessionarie</title>
+<title>Aufinity — Calcolatore ROI per concessionarie</title>
 <meta name="description" content="Quanto denaro sta perdendo la tua concessionaria ogni mese? Scoprilo in pochi secondi con il Calcolatore ROI di Aufinity.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -266,14 +266,17 @@ body{
 .au-ledger-list li:hover{ padding-left:10px; color:#fff; }
 .au-ledger-idx{ font-family:'DM Mono',monospace; font-size:11.5px; color:var(--au-blue); flex:none; }
 .au-figs{ display:flex; gap:56px; flex-wrap:wrap; }
-.au-fig-n{ font-family:'DM Mono',monospace; font-weight:500; font-size:clamp(40px,4.4vw,56px); letter-spacing:-.05em; line-height:1; }
-.au-fig-u{ font-family:'DM Mono',monospace; font-size:15px; color:var(--au-muted); margin-left:8px; letter-spacing:0; }
-.au-fig-d{ display:block; color:var(--au-muted); font-size:14.5px; line-height:1.5; margin-top:12px; max-width:200px; text-wrap:balance; }
-.au-fig:first-child .au-fig-n{ color:var(--au-blue); }
+/* 30 e 10 min: sono un riferimento di metodo, non un messaggio principale.
+   Scala ridotta e nessun accento di colore, per non competere col titolo. */
+.au-fig-n{ font-family:'DM Mono',monospace; font-weight:500; font-size:clamp(26px,2.4vw,32px); letter-spacing:-.03em; line-height:1; color:var(--au-muted-2); }
+.au-fig-u{ font-family:'DM Mono',monospace; font-size:13px; color:var(--au-muted); margin-left:6px; letter-spacing:0; }
+.au-fig-d{ display:block; color:var(--au-muted); font-size:14.5px; line-height:1.5; margin-top:9px; max-width:200px; text-wrap:balance; }
 .au-src{ margin-top:30px; font-size:12px; color:var(--au-dim); }
 @media(max-width:900px){ .au-ledger{ padding-left:0; border-left:none; } }
 
-.au-steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:88px; }
+.au-steps-title{ font-size:clamp(21px,2.1vw,26px); font-weight:500; letter-spacing:-.02em; margin-top:88px; }
+.au-steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:34px; }
+@media(max-width:760px){ .au-steps-title{ margin-top:56px; } }
 .au-step{ position:relative; padding:32px 44px 0 0; border-top:1px solid var(--au-line); }
 .au-step::before{
   content:''; position:absolute; top:-1px; left:0; height:1px; width:0;
@@ -321,7 +324,7 @@ body{
    e senza bordo, e si perde. Lo script della landing lo riposiziona in fondo
    alla colonna destra; qui gli diamo la forma di un bottone pieno.
    onclick e goToCalc() restano quelli forniti. */
-/* CTA "Parla con un esperto" aggiunta in fondo alla colonna destra */
+/* CTA "Parla con un nostro esperto" aggiunta in fondo alla colonna destra */
 .au-calc-frame .hs-section .au-hs-cta{ display:flex; width:100%; margin-top:24px; }
 .au-calc-frame .hs-section .back-btn{
   width:100%; justify-content:center;
@@ -802,7 +805,7 @@ body{
   <div class="au-wrap au-hero-inner">
 
     <div class="au-hero-copy">
-      <span class="au-eyebrow au-reveal">Aufinity ROI Calculator</span>
+      <span class="au-eyebrow au-reveal">Calcolatore ROI Aufinity</span>
       <h1 class="au-h1 au-reveal" data-d="1">Quanto denaro sta perdendo la tua concessionaria <span class="au-blue">ogni mese?</span></h1>
       <p class="au-lead au-reveal" data-d="2">Scoprilo in pochi secondi con il Calcolatore ROI di Aufinity.</p>
       <div class="au-hero-cta au-reveal" data-d="3">
@@ -878,7 +881,7 @@ body{
     <div>
       <h2 class="au-h2 au-reveal" data-d="1">Quanto ti costa oggi gestire i pagamenti manualmente?</h2>
       <p class="au-body au-reveal" data-d="2">Ogni pagamento gestito manualmente significa tempo sottratto al team della concessionaria, costi operativi e risorse che dovrebbero essere destinate ad attività più produttive.</p>
-      <p class="au-body au-reveal" data-d="2">Il ROI Calculator ti permette di trasformare questi costi in un valore concreto.</p>
+      <p class="au-body au-reveal" data-d="2">Il Calcolatore ROI ti permette di trasformare questi costi in un valore concreto.</p>
     </div>
 
     <aside class="au-ledger au-reveal" data-d="2">
@@ -906,6 +909,7 @@ body{
   </div>
 
   <div class="au-wrap" style="position:relative;z-index:1">
+    <h3 class="au-steps-title au-reveal">Ti aiutiamo a tenere sotto controllo:</h3>
     <div class="au-steps au-reveal">
       <div class="au-step">
         <span class="au-step-i">01</span>
@@ -1141,7 +1145,7 @@ body{
         <div class="au-acc-idx">02</div>
         <div class="au-acc-body">
           <div class="au-acc-t">Meno costi operativi</div>
-          <p class="au-acc-d">Riducendo il tempo e le risorse necessari per mantenere questi processi manualmente.</p>
+          <p class="au-acc-d">Attraverso l'ottimizzazione del tempo e delle risorse necessarie che oggi vengono gestiti in manuale.</p>
         </div>
       </div>
       <div class="au-acc-item" tabindex="0">
@@ -1172,11 +1176,11 @@ body{
 
     <div class="au-kpis">
       <div class="au-kpi au-reveal" data-d="1">
-        <span class="au-kpi-num" data-count-to="1500" data-suffix="+" data-sep="1">0</span>
+        <span class="au-kpi-num" data-count-to="2000" data-prefix="+" data-sep="1">0</span>
         <div class="au-kpi-label">concessionari</div>
       </div>
       <div class="au-kpi au-reveal" data-d="2">
-        <span class="au-kpi-num" data-count-to="10" data-prefix="€ " data-suffix="+ mld">0</span>
+        <span class="au-kpi-num" data-count-to="11" data-prefix="+ € " data-suffix=" mld">0</span>
         <div class="au-kpi-label">di volume di pagamenti gestito</div>
       </div>
       <div class="au-kpi au-reveal" data-d="3">
@@ -1193,7 +1197,8 @@ body{
         <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b9803d697afeea80f2d46a_LOGO-GRUPPO-GMG.png" alt="Gruppo GMG" loading="lazy">
         <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/6949133f152707c7b374906f_Logo-Vettoriale-Lodauto-2.png" alt="Lodauto" loading="lazy">
         <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b181c4bc98e372578e61c6_Logo-Rangoni-Sfondo-Trasparente%20(1).png" alt="Rangoni" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b980b0cf2b4d46359d29bb_logo-ucism-last-version.png" alt="UCISM" loading="lazy"></div>
+        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b980b0cf2b4d46359d29bb_logo-ucism-last-version.png" alt="UCISM" loading="lazy">
+        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/6a31452360045fb48e4959af_PENSKECARS_scontornato.png" alt="Penske Cars" loading="lazy"></div>
     </div>
   </div>
 </section>
@@ -1207,11 +1212,11 @@ body{
       <p class="au-final-q">Vuoi capire cosa significa per la tua concessionaria?</p>
 
       <div class="au-final-sub">
-        <h3 class="au-h3">Parla con un esperto Aufinity</h3>
+        <h3 class="au-h3">Parla con un nostro esperto Aufinity</h3>
         <p>Lascia i tuoi dati. Un nostro consulente analizzerà insieme a te il risultato del calcolatore e ti mostrerà dove puoi recuperare efficienza.</p>
         <div class="au-final-cta">
           <a class="au-btn au-btn-primary" href="https://www.aufinity.com/it/consulenza">
-            <span>Parla con un esperto</span>
+            <span>Parla con un nostro esperto</span>
             <svg class="au-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
           <a class="au-btn au-btn-ghost" href="#calcolatore"><span>Ricalcola il tuo ROI</span></a>
@@ -1282,7 +1287,7 @@ body{
 </svg></a>
         <p class="au-footer-tag">Gestione digitale dei pagamenti per le concessionarie auto.</p>
         <a class="au-btn au-btn-light au-btn-sm" href="https://www.aufinity.com/it/consulenza" style="margin-top:24px">
-          <span>Parla con un esperto</span>
+          <span>Parla con un nostro esperto</span>
         </a>
       </div>
 
@@ -1331,7 +1336,7 @@ body{
   if(y) y.textContent = new Date().getFullYear();
 
   /* ─── colonna destra della schermata risultati ───
-     Ci appendiamo la CTA "Parla con un esperto" e, sotto, il "Torna al
+     Ci appendiamo la CTA "Parla con un nostro esperto" e, sotto, il "Torna al
      calcolatore" del calcolatore. Del bottone fornito spostiamo solo il nodo:
      onclick e goToCalc() restano intatti. */
   var backBtn = document.querySelector('.au-calc-frame .back-btn');
@@ -1340,7 +1345,7 @@ body{
     var expert = document.createElement('a');
     expert.className = 'au-btn au-btn-primary au-hs-cta';
     expert.href = 'https://www.aufinity.com/it/consulenza';
-    expert.innerHTML = '<span>Parla con un esperto</span>' +
+    expert.innerHTML = '<span>Parla con un nostro esperto</span>' +
       '<svg class="au-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
       'stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
     hsCol.appendChild(expert);
@@ -1359,6 +1364,20 @@ body{
     }, { threshold:.12, rootMargin:'0px 0px -8% 0px' });
     targets.forEach(function(el){ io.observe(el); });
   }
+
+  /* ─── etichetta del submit HubSpot ───
+     "Fissare un appuntamento" arriva dalla configurazione del form su
+     HubSpot, non dal nostro codice. Qui la sovrascriviamo appena il form
+     e' renderizzato; la correzione definitiva va fatta su HubSpot. */
+  var hsLabel = 'Prenota una consulenza';
+  (function fixHsLabel(tries){
+    var b = document.querySelector('#hs-form-container input[type="submit"], #hs-form-container .hs-button');
+    if(b){
+      if(b.value !== undefined) b.value = hsLabel; else b.textContent = hsLabel;
+      return;
+    }
+    if(tries > 0) setTimeout(function(){ fixHsLabel(tries - 1); }, 300);
+  })(40);
 
   /* ─── FAQ: una aperta alla volta ───
      I browser recenti lo fanno da soli con details[name]; qui il fallback. */

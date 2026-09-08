@@ -50,6 +50,7 @@ LOGOS = [
     ('Lodauto', '6949133f152707c7b374906f_Logo-Vettoriale-Lodauto-2.png'),
     ('Rangoni', '68b181c4bc98e372578e61c6_Logo-Rangoni-Sfondo-Trasparente%20(1).png'),
     ('UCISM', '68b980b0cf2b4d46359d29bb_logo-ucism-last-version.png'),
+    ('Penske Cars', '6a31452360045fb48e4959af_PENSKECARS_scontornato.png'),
 ]
 BASE = 'https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/'
 logos_html = '\n        '.join(
