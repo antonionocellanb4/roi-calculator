@@ -1,17 +1,20 @@
 # Aufinity — Landing ROI Calculator
 
-Landing page dedicata al Calcolatore ROI di Aufinity. Pagina singola,
-self-contained: nessun build step in produzione, nessuna dipendenza da
-installare. Si apre `index.html` e basta.
+Landing page dedicata al Calcolatore ROI di Aufinity. Una pagina HTML e una
+cartella di immagini: nessun build step in produzione, nessuna dipendenza da
+installare, nessun framework.
 
 ## Struttura
 
 ```
 index.html              la pagina completa da pubblicare (generata)
+assets/logos/*.png      loghi clienti, ritagliati e normalizzati (generati)
 src/landing_shell.html  sorgente della landing, con i marker di innesto
 src/roi_calculator.html calcolatore fornito dal cliente, non modificato
 src/logo.svg            logo Aufinity estratto da aufinity.com
+src/logos.json          dimensione di resa di ogni logo (generato)
 src/build.py            innesta il calcolatore nella shell -> index.html
+src/fetch_logos.py      scarica, ritaglia e normalizza i loghi clienti
 ```
 
 **`index.html` è generato: non modificarlo a mano.** Si lavora su
@@ -50,4 +53,17 @@ stilizzato, così non c'è collisione possibile con il CSS del calcolatore.
   `python -m http.server 8000` e poi `http://127.0.0.1:8000`.
 - Font: DM Sans + DM Mono da Google Fonts. Colori e tipografia presi da
   aufinity.com e dalla landing Oktoberfest.
-- I loghi clienti sono caricati dal CDN Webflow di Aufinity.
+- **I loghi clienti sono serviti dal repo, non dal CDN.** Gli originali
+  Webflow hanno margini vuoti di ampiezza molto diversa e proporzioni
+  estreme (Penske e' 12.6:1, Lodauto 1.4:1): nel marquee alcuni risultavano
+  minuscoli e altri enormi. `src/fetch_logos.py` li scarica, ritaglia il
+  bordo vuoto e calcola per ognuno una dimensione di resa a parita' di area,
+  che finisce in `src/logos.json`. Per riscaricarli serve Pillow:
+
+  ```bash
+  pip install Pillow
+  python src/fetch_logos.py
+  python src/build.py
+  ```
+
+  `build.py` invece usa solo la stdlib: legge il manifest gia' pronto.

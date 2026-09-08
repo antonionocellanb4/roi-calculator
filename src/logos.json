@@ -1,0 +1,56 @@
+[
+  {
+    "file": "aimg.png",
+    "name": "AIMG",
+    "w": 117,
+    "h": 26
+  },
+  {
+    "file": "crema-diesel.png",
+    "name": "Crema Diesel",
+    "w": 81,
+    "h": 37
+  },
+  {
+    "file": "dag-auto.png",
+    "name": "Dag Auto",
+    "w": 100,
+    "h": 30
+  },
+  {
+    "file": "fm.png",
+    "name": "FM",
+    "w": 136,
+    "h": 22
+  },
+  {
+    "file": "gmg.png",
+    "name": "Gruppo GMG",
+    "w": 136,
+    "h": 22
+  },
+  {
+    "file": "lodauto.png",
+    "name": "Lodauto",
+    "w": 59,
+    "h": 42
+  },
+  {
+    "file": "rangoni.png",
+    "name": "Rangoni & Affini",
+    "w": 135,
+    "h": 22
+  },
+  {
+    "file": "ucism.png",
+    "name": "UCISM",
+    "w": 112,
+    "h": 27
+  },
+  {
+    "file": "penske.png",
+    "name": "Penske Cars",
+    "w": 194,
+    "h": 15
+  }
+]

@@ -445,25 +445,29 @@ body{
 }
 .au-kpi-label{ color:var(--au-muted); font-size:16px; margin-top:14px; line-height:1.5; }
 .au-marquee{
-  margin-top:64px; position:relative; overflow:hidden;
+  margin-top:104px; position:relative; overflow:hidden;
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
           mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
 }
-.au-marquee-track{ display:flex; gap:44px; width:max-content; animation:au-scroll 38s linear infinite; align-items:center; }
+.au-marquee-track{ display:flex; gap:60px; width:max-content; animation:au-scroll 38s linear infinite; align-items:center; }
 .au-marquee:hover .au-marquee-track{ animation-play-state:paused; }
 @keyframes au-scroll{ to{ transform:translateX(-50%); } }
 /* I loghi arrivano in colori misti (bianchi e scuri): brightness(0) invert(1)
    li normalizza in bianco monocromatico.
-   Con height fissa e width:auto ognuno occupava una larghezza diversa a
-   seconda delle proporzioni, quindi i logotipi larghi sembravano enormi e
-   quelli compatti minuscoli. Ora ogni logo sta in una scatola uguale per
-   tutti e object-fit:contain lo rimpicciolisce quanto serve per starci. */
+   Le dimensioni arrivano da --w/--h calcolate da fetch_logos.py: i file sono
+   ritagliati dai margini vuoti e dimensionati a parita' di AREA, non dentro
+   una scatola fissa. Con la scatola fissa un logotipo 12.6:1 come Penske si
+   schiacciava a 12px di altezza mentre uno 1.4:1 ne usava 40. */
 .au-marquee img{
-  width:148px; height:40px; object-fit:contain; object-position:center;
-  opacity:.42; filter:brightness(0) invert(1); transition:opacity .3s; flex:none;
+  width:var(--w); height:var(--h); flex:none;
+  opacity:.42; filter:brightness(0) invert(1); transition:opacity .3s;
 }
 .au-marquee img:hover{ opacity:.95; }
-@media(max-width:600px){ .au-marquee img{ width:116px; height:34px; } }
+@media(max-width:600px){
+  .au-marquee{ margin-top:72px; }
+  .au-marquee-track{ gap:40px; }
+  .au-marquee img{ width:calc(var(--w) * .78); height:calc(var(--h) * .78); }
+}
 
 /* ─── 07 CTA FINALE ─── */
 /* niente box: la chiusura sta sulla pagina, con più aria e un titolo più
@@ -1219,15 +1223,15 @@ body{
     </div>
 
     <div class="au-marquee au-reveal" data-d="2" aria-hidden="true">
-      <div class="au-marquee-track"><img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b16c1f433e6ceba795b855_AIMG-Logo_white-it.png" alt="AIMG" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68a4750b35f6922171a1a7d6_crema_diesel.png" alt="Crema Diesel" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/6978c16efaa7ea96445ea0ef_stella-con-dag-auto.png" alt="Dag Auto" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b16c3797bdf317dc0559c7_Logo_FM_Bianco%20(1).png" alt="FM" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b9803d697afeea80f2d46a_LOGO-GRUPPO-GMG.png" alt="Gruppo GMG" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/6949133f152707c7b374906f_Logo-Vettoriale-Lodauto-2.png" alt="Lodauto" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b181c4bc98e372578e61c6_Logo-Rangoni-Sfondo-Trasparente%20(1).png" alt="Rangoni" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/68b980b0cf2b4d46359d29bb_logo-ucism-last-version.png" alt="UCISM" loading="lazy">
-        <img src="https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/6a31452360045fb48e4959af_PENSKECARS_scontornato.png" alt="Penske Cars" loading="lazy"></div>
+      <div class="au-marquee-track"><img src="assets/logos/aimg.png" alt="AIMG" width="117" height="26" style="--w:117px;--h:26px" loading="lazy">
+        <img src="assets/logos/crema-diesel.png" alt="Crema Diesel" width="81" height="37" style="--w:81px;--h:37px" loading="lazy">
+        <img src="assets/logos/dag-auto.png" alt="Dag Auto" width="100" height="30" style="--w:100px;--h:30px" loading="lazy">
+        <img src="assets/logos/fm.png" alt="FM" width="136" height="22" style="--w:136px;--h:22px" loading="lazy">
+        <img src="assets/logos/gmg.png" alt="Gruppo GMG" width="136" height="22" style="--w:136px;--h:22px" loading="lazy">
+        <img src="assets/logos/lodauto.png" alt="Lodauto" width="59" height="42" style="--w:59px;--h:42px" loading="lazy">
+        <img src="assets/logos/rangoni.png" alt="Rangoni & Affini" width="135" height="22" style="--w:135px;--h:22px" loading="lazy">
+        <img src="assets/logos/ucism.png" alt="UCISM" width="112" height="27" style="--w:112px;--h:27px" loading="lazy">
+        <img src="assets/logos/penske.png" alt="Penske Cars" width="194" height="15" style="--w:194px;--h:15px" loading="lazy"></div>
     </div>
   </div>
 </section>

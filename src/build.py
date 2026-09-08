@@ -6,6 +6,7 @@ Il codice del calcolatore viene copiato verbatim da src/roi_calculator.html.
 Unica modifica ammessa dal brief (container/wrapper): il selettore `body`
 diventa `.roi-embed`, il wrapper in cui la landing lo incapsula.
 """
+import json
 import re
 import pathlib
 
@@ -41,20 +42,16 @@ logo = logo.replace('class="cls-3"', 'fill="#ffffff"')
 logo = re.sub(r'\s*id="Ebene_1"|\s*data-name="Ebene 1"', '', logo)
 logo = re.sub(r'\n\s*\n', '\n', logo).strip()
 
-LOGOS = [
-    ('AIMG', '68b16c1f433e6ceba795b855_AIMG-Logo_white-it.png'),
-    ('Crema Diesel', '68a4750b35f6922171a1a7d6_crema_diesel.png'),
-    ('Dag Auto', '6978c16efaa7ea96445ea0ef_stella-con-dag-auto.png'),
-    ('FM', '68b16c3797bdf317dc0559c7_Logo_FM_Bianco%20(1).png'),
-    ('Gruppo GMG', '68b9803d697afeea80f2d46a_LOGO-GRUPPO-GMG.png'),
-    ('Lodauto', '6949133f152707c7b374906f_Logo-Vettoriale-Lodauto-2.png'),
-    ('Rangoni', '68b181c4bc98e372578e61c6_Logo-Rangoni-Sfondo-Trasparente%20(1).png'),
-    ('UCISM', '68b980b0cf2b4d46359d29bb_logo-ucism-last-version.png'),
-    ('Penske Cars', '6a31452360045fb48e4959af_PENSKECARS_scontornato.png'),
-]
-BASE = 'https://cdn.prod.website-files.com/667d1179ca68e73aa5dc5ce6/'
-logos_html = '\n        '.join(
-    '<img src="%s%s" alt="%s" loading="lazy">' % (BASE, f, n) for n, f in LOGOS
+# I loghi sono ritagliati e normalizzati per area da src/fetch_logos.py, che
+# scrive src/logos.json con la dimensione di resa di ognuno. Qui basta la
+# stdlib: nessuna dipendenza da Pillow per rigenerare la pagina.
+manifest = json.loads((SRC / 'logos.json').read_text(encoding='utf-8'))
+SEP = chr(10) + ' ' * 8
+logos_html = SEP.join(
+    '<img src="assets/logos/%s" alt="%s" width="%d" height="%d" '
+    'style="--w:%dpx;--h:%dpx" loading="lazy">'
+    % (l['file'], l['name'], l['w'], l['h'], l['w'], l['h'])
+    for l in manifest
 )
 
 # --- splice ----------------------------------------------------------------
